@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cafe Details - CaféNest</title>
+  <meta name="description" content="View menu, check seating, and book a table at top cafes in Amravati with CaféNest.">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/cafe-details.css">
+</head>
+<body>
+
+  <!-- HERO BANNER (Full-width with overlaid minimal header) -->
+  <section class="details-hero" aria-label="Cafe Hero Banner">
+    
+    <!-- Minimal Header: Logo on left, Heart on right (as observed in cafe details.png) -->
+    <header class="details-header">
+      <div class="container details-header-inner">
+        <a href="index.html" class="brand" aria-label="CaféNest Home">
+          <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
+            <line x1="6" y1="2" x2="6" y2="5" />
+            <line x1="10" y1="2" x2="10" y2="5" />
+            <line x1="14" y1="2" x2="14" y2="5" />
+          </svg>
+          <div class="brand-text">
+            <span class="brand-title">CaféNest</span>
+          </div>
+        </a>
+
+        <!-- Circular Outlined Heart Button -->
+        <button type="button" 
+                class="btn-hero-heart" 
+                id="details-hero-heart" 
+                aria-label="Save to favorites" 
+                aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero Content: Name, Rating, Location, Tags & Book a Table CTA -->
+    <div class="details-hero-content">
+      <div class="container hero-main-row">
+        <div class="hero-info-col">
+          <h1 class="details-cafe-name" id="details-cafe-name">The Brew House</h1>
+          
+          <div class="details-meta-row">
+            <div class="details-meta-rating">
+              <svg class="star-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <span id="details-rating">4.5</span>
+              <span class="reviews-count" id="details-reviews">(120+)</span>
+            </div>
+            <span>&bull;</span>
+            <div class="details-meta-location">
+              <svg class="pin-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span id="details-city">Amravati</span>
+              <span>&bull;</span>
+              <span id="details-dist">1.2 km</span>
+            </div>
+          </div>
+
+          <div class="hero-tags-row" id="details-tags-container">
+            <!-- Rendered by cafe-details.js -->
+          </div>
+        </div>
+
+        <button type="button" class="btn-book-table" id="details-book-btn">
+          Book a Table
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB NAVIGATION BAR -->
+  <nav class="details-tabs-bar" aria-label="Cafe Details Tabs">
+    <div class="container">
+      <ul class="tabs-list" role="tablist">
+        <li role="presentation">
+          <button type="button" 
+                  role="tab" 
+                  id="tab-overview" 
+                  aria-selected="false" 
+                  aria-controls="panel-overview" 
+                  tabindex="-1"
+                  class="tab-btn">
+            Overview
+          </button>
+        </li>
+        <li role="presentation">
+          <button type="button" 
+                  role="tab" 
+                  id="tab-menu" 
+                  aria-selected="true" 
+                  aria-controls="panel-menu" 
+                  tabindex="0"
+                  class="tab-btn">
+            Menu
+          </button>
+        </li>
+        <li role="presentation">
+          <button type="button" 
+                  role="tab" 
+                  id="tab-seating" 
+                  aria-selected="false" 
+                  aria-controls="panel-seating" 
+                  tabindex="-1"
+                  class="tab-btn">
+            Seating
+          </button>
+        </li>
+        <li role="presentation">
+          <button type="button" 
+                  role="tab" 
+                  id="tab-photos" 
+                  aria-selected="false" 
+                  aria-controls="panel-photos" 
+                  tabindex="-1"
+                  class="tab-btn">
+            Photos
+          </button>
+        </li>
+        <li role="presentation">
+          <button type="button" 
+                  role="tab" 
+                  id="tab-reviews" 
+                  aria-selected="false" 
+                  aria-controls="panel-reviews" 
+                  tabindex="-1"
+                  class="tab-btn">
+            Reviews
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- MAIN TAB PANELS CONTENT AREA -->
+  <main class="container tabpanel-container">
+    
+    <!-- Panel 1: Overview (Placeholder) -->
+    <section id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" class="tabpanel">
+      <div class="panel-placeholder">
+        <h2 class="panel-placeholder-title">Cafe Overview</h2>
+        <p class="panel-placeholder-text">This section's design hasn't been supplied yet (demo).</p>
+      </div>
+    </section>
+
+    <!-- Panel 2: Menu (Active by default, matching cafe details.png) -->
+    <section id="panel-menu" role="tabpanel" aria-labelledby="tab-menu" class="tabpanel active">
+      <div class="menu-card-box">
+        
+        <!-- Left Categories Sidebar -->
+        <aside class="menu-sidebar" id="menu-categories-list" aria-label="Menu Categories">
+          <!-- Rendered by cafe-details.js -->
+        </aside>
+
+        <!-- Right Menu Items Pane -->
+        <div class="menu-items-pane" tabindex="0" aria-label="Scrollable Menu Items List">
+          <h2 class="menu-pane-heading">Our Menu</h2>
+          <ul class="menu-items-list" id="menu-items-list" aria-label="Menu Items">
+            <!-- Rendered by cafe-details.js -->
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Panel 3: Seating (Placeholder) -->
+    <section id="panel-seating" role="tabpanel" aria-labelledby="tab-seating" class="tabpanel">
+      <div class="panel-placeholder">
+        <h2 class="panel-placeholder-title">Seating Arrangements</h2>
+        <p class="panel-placeholder-text">This section's design hasn't been supplied yet (demo).</p>
+      </div>
+    </section>
+
+    <!-- Panel 4: Photos (Placeholder) -->
+    <section id="panel-photos" role="tabpanel" aria-labelledby="tab-photos" class="tabpanel">
+      <div class="panel-placeholder">
+        <h2 class="panel-placeholder-title">Cafe Photos</h2>
+        <p class="panel-placeholder-text">This section's design hasn't been supplied yet (demo).</p>
+      </div>
+    </section>
+
+    <!-- Panel 5: Reviews (Placeholder) -->
+    <section id="panel-reviews" role="tabpanel" aria-labelledby="tab-reviews" class="tabpanel">
+      <div class="panel-placeholder">
+        <h2 class="panel-placeholder-title">Customer Reviews</h2>
+        <p class="panel-placeholder-text">This section's design hasn't been supplied yet (demo).</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Shared Footer Mount -->
+  <div id="site-footer-mount"></div>
+
+  <!-- Toast Notification Mount -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/cafe-details.js"></script>
+  <!-- Backend integration -->
+  <script src="js/api-bridge.js"></script>
+  <script src="js/cart-ui.js"></script>
+</body>
+</html>

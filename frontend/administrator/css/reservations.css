@@ -1,0 +1,809 @@
+/* ==========================================================================
+   CaféNest Administrator — Reservations Styles
+   Matches reservation.png aesthetic and CafeNest design tokens
+   ========================================================================== */
+
+/* ── Page Header ── */
+.reservations-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.reservations-heading {
+  font-family: var(--font-display, inherit);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text, #2B1A10);
+  margin: 0 0 4px;
+  line-height: 1.25;
+}
+
+.reservations-sub {
+  font-size: 0.95rem;
+  color: var(--color-muted, #6B5A4C);
+  margin: 0;
+}
+
+/* ── Header Controls (Date Picker, Status Select, View Calendar) ── */
+.reservations-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Date Control Box */
+.date-picker-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.date-picker-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border, #E8DEC8);
+  border-radius: var(--radius-sm, 8px);
+  padding: 9px 14px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--color-text, #2B1A10);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.04));
+  transition: border-color var(--transition-fast, 0.2s), box-shadow var(--transition-fast, 0.2s);
+}
+
+.date-picker-btn:hover {
+  border-color: var(--color-primary, #5A2E14);
+}
+
+.date-picker-btn:focus-visible {
+  outline: none;
+  border-color: var(--color-primary, #5A2E14);
+  box-shadow: 0 0 0 3px rgba(90, 46, 20, 0.15);
+}
+
+.date-icon {
+  width: 17px;
+  height: 17px;
+  stroke: var(--color-muted, #6B5A4C);
+  stroke-width: 2;
+  fill: none;
+}
+
+.date-arrows {
+  width: 14px;
+  height: 14px;
+  stroke: var(--color-muted, #6B5A4C);
+  stroke-width: 2;
+  fill: none;
+  margin-left: 2px;
+}
+
+/* Hidden date input that overlays or triggers */
+.hidden-date-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Status Filter Dropdown */
+.status-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.status-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border, #E8DEC8);
+  border-radius: var(--radius-sm, 8px);
+  padding: 9px 36px 9px 14px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--color-text, #2B1A10);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.04));
+  transition: border-color var(--transition-fast, 0.2s), box-shadow var(--transition-fast, 0.2s);
+}
+
+.status-select:hover {
+  border-color: var(--color-primary, #5A2E14);
+}
+
+.status-select:focus-visible {
+  outline: none;
+  border-color: var(--color-primary, #5A2E14);
+  box-shadow: 0 0 0 3px rgba(90, 46, 20, 0.15);
+}
+
+.select-arrow {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  width: 15px;
+  height: 15px;
+  stroke: var(--color-muted, #6B5A4C);
+  stroke-width: 2;
+  fill: none;
+}
+
+/* View Calendar Button */
+.btn-view-calendar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #2C1206;
+  color: #FFFFFF;
+  border: 1px solid #2C1206;
+  border-radius: var(--radius-sm, 8px);
+  padding: 9px 18px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(44, 18, 6, 0.2);
+  transition: background-color var(--transition-fast, 0.2s), transform var(--transition-fast, 0.2s);
+}
+
+.btn-view-calendar:hover {
+  background-color: #3F1B0B;
+  transform: translateY(-1px);
+}
+
+.btn-view-calendar:active {
+  transform: translateY(0);
+}
+
+/* ── Filter Summary Banner (optional when filtering is active) ── */
+.filter-reset-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #F8F3EA;
+  border: 1px solid var(--color-border, #E8DEC8);
+  border-radius: var(--radius-sm, 8px);
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
+  color: var(--color-text, #2B1A10);
+}
+
+.btn-filter-reset {
+  background: transparent;
+  border: none;
+  color: #8C5E09;
+  font-weight: 600;
+  font-size: 0.86rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 2px 6px;
+}
+
+.btn-filter-reset:hover {
+  color: var(--color-primary, #5A2E14);
+}
+
+/* ── Reservations Table Card ── */
+.table-card {
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border, #E8DEC8);
+  border-radius: var(--radius-card, 14px);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+  overflow: hidden;
+}
+
+.table-responsive-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.reservations-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.94rem;
+}
+
+/* Header */
+.reservations-table thead {
+  background-color: #F6F1E7;
+}
+
+.reservations-table th {
+  padding: 16px 20px;
+  font-weight: 600;
+  color: #4A3A2F;
+  font-size: 0.9rem;
+  letter-spacing: 0.2px;
+  border-bottom: 1px solid #E8DEC8;
+  white-space: nowrap;
+}
+
+/* Alignments */
+.reservations-table th.col-status,
+.reservations-table td.col-status {
+  text-align: center;
+}
+
+.reservations-table th.col-guests,
+.reservations-table td.col-guests {
+  text-align: left;
+}
+
+.reservations-table th.col-action,
+.reservations-table td.col-action {
+  text-align: right;
+  padding-right: 24px;
+}
+
+/* Table Body Rows */
+.reservations-table tbody tr {
+  border-bottom: 1px solid #F0E8D8;
+  transition: background-color var(--transition-fast, 0.15s);
+}
+
+.reservations-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.reservations-table tbody tr:hover {
+  background-color: #FCF9F3;
+}
+
+.reservations-table td {
+  padding: 18px 20px;
+  color: var(--color-text, #2B1A10);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* ID & Customer Name */
+.td-id {
+  font-weight: 500;
+  color: #2B1A10;
+}
+
+.td-name {
+  font-weight: 600;
+  color: #2B1A10;
+}
+
+.td-datetime {
+  color: #4A3A2F;
+}
+
+.td-table {
+  font-weight: 500;
+  color: #2B1A10;
+}
+
+.td-guests {
+  font-weight: 500;
+  color: #2B1A10;
+}
+
+/* ── Status Pill Badges ── */
+.status-pill {
+  display: inline-block;
+  padding: 6px 18px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 96px;
+}
+
+/* Confirmed (Soft Green) */
+.status-pill.status-confirmed {
+  background-color: #DDF1E2;
+  color: #17632D;
+}
+
+/* Pending (Soft Amber) */
+.status-pill.status-pending {
+  background-color: #FEF0CD;
+  color: #8C5E09;
+}
+
+/* Cancelled (Soft Red) */
+.status-pill.status-cancelled {
+  background-color: #FCDDDD;
+  color: #B92525;
+}
+
+/* ── Row Action Buttons ── */
+.action-buttons-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+/* View button */
+.btn-row-view {
+  background-color: #FFFFFF;
+  border: 1px solid #D8CDBA;
+  border-radius: var(--radius-sm, 8px);
+  padding: 6px 16px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #2B1A10;
+  cursor: pointer;
+  transition: background-color var(--transition-fast, 0.2s), border-color var(--transition-fast, 0.2s);
+}
+
+.btn-row-view:hover {
+  background-color: #F8F3EA;
+  border-color: #C5B6A0;
+}
+
+.btn-row-view:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(90, 46, 20, 0.15);
+}
+
+/* Three-dot button */
+.btn-row-more {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FFFFFF;
+  border: 1px solid #D8CDBA;
+  border-radius: var(--radius-sm, 8px);
+  color: #2B1A10;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color var(--transition-fast, 0.2s), border-color var(--transition-fast, 0.2s);
+}
+
+.btn-row-more:hover {
+  background-color: #F8F3EA;
+  border-color: #C5B6A0;
+}
+
+.btn-row-more:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(90, 46, 20, 0.15);
+}
+
+.btn-row-more svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* ── Three-Dot Action Dropdown Menu ── */
+.row-action-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border, #E8DEC8);
+  border-radius: var(--radius-sm, 8px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  min-width: 160px;
+  z-index: 100;
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.row-action-menu[hidden] {
+  display: none !important;
+}
+
+.menu-item-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 16px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #2B1A10;
+  cursor: pointer;
+  transition: background-color var(--transition-fast, 0.15s);
+}
+
+.menu-item-btn:hover,
+.menu-item-btn:focus-visible {
+  background-color: #FAF4E9;
+  outline: none;
+}
+
+.menu-item-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke: var(--color-muted, #6B5A4C);
+  stroke-width: 2;
+  fill: none;
+}
+
+.menu-divider {
+  height: 1px;
+  background-color: #E8DEC8;
+  margin: 4px 0;
+}
+
+/* ── Empty State ── */
+.table-empty-row td {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--color-muted, #6B5A4C);
+}
+
+.table-empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.table-empty-icon {
+  width: 44px;
+  height: 44px;
+  stroke: #A89886;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.table-empty-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #2B1A10;
+  margin: 0;
+}
+
+.table-empty-desc {
+  font-size: 0.9rem;
+  color: #6B5A4C;
+  margin: 0;
+}
+
+/* ── Modals: View Details & Change Status & Calendar ── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(20, 10, 5, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-backdrop[hidden] {
+  display: none !important;
+}
+
+.modal-dialog {
+  background-color: #FFFFFF;
+  border-radius: var(--radius-card, 14px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.22);
+  width: 100%;
+  max-width: 480px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-border, #E8DEC8);
+}
+
+.modal-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text, #2B1A10);
+  margin: 0;
+}
+
+.btn-modal-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  color: var(--color-muted, #6B5A4C);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-modal-close:hover {
+  background-color: rgba(0,0,0,0.06);
+  color: var(--color-text, #2B1A10);
+}
+
+.btn-modal-close svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.modal-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  background-color: #FAF6EE;
+  border-top: 1px solid var(--color-border, #E8DEC8);
+}
+
+.btn-modal-cancel {
+  background: transparent;
+  border: 1px solid var(--color-border, #E8DEC8);
+  border-radius: var(--radius-sm, 8px);
+  padding: 9px 18px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-text, #2B1A10);
+  cursor: pointer;
+}
+
+.btn-modal-cancel:hover {
+  background-color: #F0E8D8;
+}
+
+.btn-modal-primary {
+  background-color: #2C1206;
+  border: 1px solid #2C1206;
+  border-radius: var(--radius-sm, 8px);
+  padding: 9px 20px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.btn-modal-primary:hover {
+  background-color: #3F1B0B;
+}
+
+/* Detail list inside View modal */
+.details-kv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.details-kv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #F0E8D8;
+}
+
+.details-kv-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.details-k {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-muted, #6B5A4C);
+}
+
+.details-v {
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: var(--color-text, #2B1A10);
+}
+
+/* Change Status Radio Options */
+.status-options-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-radio-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--color-border, #E8DEC8);
+  border-radius: var(--radius-sm, 8px);
+  cursor: pointer;
+  transition: border-color var(--transition-fast, 0.2s), background-color var(--transition-fast, 0.2s);
+}
+
+.status-radio-card:hover {
+  background-color: #FCF9F4;
+}
+
+.status-radio-card.selected {
+  border-color: var(--color-primary, #5A2E14);
+  background-color: #FBF6EE;
+}
+
+.status-radio-card input {
+  margin: 0;
+  accent-color: #5A2E14;
+}
+
+.status-radio-title {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--color-text, #2B1A10);
+}
+
+/* Calendar Modal Grid */
+.calendar-card {
+  max-width: 440px;
+}
+
+.cal-month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.cal-month-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #2B1A10;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  text-align: center;
+}
+
+.cal-day-head {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #8C7868;
+  padding: 4px 0;
+}
+
+.cal-day-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #4A3A2F;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color var(--transition-fast, 0.15s);
+}
+
+.cal-day-cell:hover:not(.other-month) {
+  background-color: #F4EEDF;
+}
+
+.cal-day-cell.other-month {
+  color: #C0B4A4;
+  cursor: default;
+}
+
+.cal-day-cell.has-events {
+  font-weight: 700;
+  border-color: #D8CDBA;
+  background-color: #FDF9F2;
+}
+
+.cal-day-cell.is-selected {
+  background-color: #2C1206 !important;
+  color: #FFFFFF !important;
+}
+
+.cal-day-badge {
+  position: absolute;
+  bottom: 2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #5A2E14;
+}
+
+.cal-day-cell.is-selected .cal-day-badge {
+  background-color: #FFFFFF;
+}
+
+/* ── Responsive Adaptations ── */
+@media (max-width: 1024px) {
+  .reservations-table th,
+  .reservations-table td {
+    padding: 14px 16px;
+  }
+}
+
+@media (max-width: 767px) {
+  .reservations-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .reservations-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .date-picker-wrap,
+  .status-select-wrap {
+    flex: 1;
+  }
+
+  .date-picker-btn,
+  .status-select {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .btn-view-calendar {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .reservations-table th,
+  .reservations-table td {
+    padding: 12px 14px;
+    font-size: 0.88rem;
+  }
+
+  .status-pill {
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    min-width: 80px;
+  }
+}

@@ -1,0 +1,447 @@
+/* ==========================================================================
+   CaféNest Administrator — Menu & Prices Page Styles
+   ========================================================================== */
+
+/* ── Page Header Row ── */
+.menu-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.menu-page-heading {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.menu-page-sub {
+  font-size: 0.93rem;
+  color: var(--color-muted);
+}
+
+/* Add Menu Item button */
+.btn-add-menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--sidebar-bg);
+  color: #fff;
+  border-radius: var(--radius-btn);
+  font-size: 0.92rem;
+  font-weight: 600;
+  transition: background var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-add-menu:hover { background: #1A0A03; }
+.btn-add-menu svg {
+  width: 18px; height: 18px;
+  stroke: currentColor; stroke-width: 2.5; fill: none;
+}
+
+/* ── Category Filter Pills ── */
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.filter-pill {
+  padding: 8px 20px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card-surface);
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.filter-pill:hover {
+  border-color: #B8A898;
+  color: var(--color-text);
+}
+.filter-pill.active {
+  background: var(--sidebar-bg);
+  border-color: var(--sidebar-bg);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ── Menu Grid ── */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Empty state */
+.menu-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}
+
+/* ── Menu Card ── */
+.menu-card {
+  background: var(--color-card-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow var(--transition-fast);
+}
+.menu-card:hover { box-shadow: 0 4px 18px rgba(43,26,16,0.10); }
+
+/* Card body: image left + details right */
+.menu-card-body {
+  display: flex;
+  gap: 16px;
+  padding: 16px 16px 14px;
+  flex: 1;
+}
+
+/* Food image */
+.menu-card-img {
+  width: 120px;
+  height: 130px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #EEE8DB; /* placeholder bg if img fails */
+}
+
+/* Placeholder shown when image doesn't exist */
+.menu-img-placeholder {
+  width: 120px;
+  height: 130px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background: linear-gradient(145deg, #EDE3D5 0%, #D8CCBA 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #B8A898;
+}
+.menu-img-placeholder svg {
+  width: 40px; height: 40px;
+  stroke: currentColor; stroke-width: 1.5; fill: none; opacity: 0.6;
+}
+
+/* Card details */
+.menu-card-details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-card-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+
+.menu-card-desc {
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.menu-card-price {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-top: 6px;
+}
+
+/* Availability row */
+.menu-avail-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* Accessible toggle switch */
+.avail-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.avail-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.avail-track {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-pill);
+  background: #CBD5C8; /* muted off */
+  transition: background var(--transition-fast);
+  cursor: pointer;
+}
+.avail-track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-circle);
+  background: #fff;
+  transition: transform var(--transition-fast);
+}
+.avail-switch input:checked + .avail-track {
+  background: #3DAA68; /* green */
+}
+.avail-switch input:checked + .avail-track::after {
+  transform: translateX(18px);
+}
+.avail-switch input:focus-visible + .avail-track {
+  outline: 2px solid var(--color-star);
+  outline-offset: 2px;
+}
+
+.avail-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #3DAA68;
+}
+.avail-label.unavailable { color: #B82020; }
+
+/* Card action row */
+.menu-card-actions {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.btn-card-action {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 10px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  border-radius: 0;
+  transition: background var(--transition-fast);
+}
+
+.btn-card-action svg {
+  width: 15px; height: 15px;
+  stroke: currentColor; stroke-width: 2; fill: none; flex-shrink: 0;
+}
+
+.btn-card-edit {
+  background: #F5F0E8;
+  color: var(--color-text);
+  border-right: 1px solid var(--color-border);
+  border-bottom-left-radius: var(--radius-card);
+}
+.btn-card-edit:hover { background: #EDE5D8; }
+
+.btn-card-delete {
+  background: #FDF0F0;
+  color: #C0392B;
+  border-bottom-right-radius: var(--radius-card);
+}
+.btn-card-delete:hover { background: #F9DEDE; }
+
+/* ==========================================================================
+   MODAL (shared for Add / Edit and Confirm Delete)
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-backdrop[hidden] { display: none; }
+
+.modal-dialog {
+  background: var(--color-card-surface);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.20);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.btn-modal-close {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-muted);
+  transition: background var(--transition-fast);
+}
+.btn-modal-close:hover { background: rgba(43,26,16,0.08); }
+.btn-modal-close svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+.modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Form groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.form-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+.form-input,
+.form-select,
+.form-textarea {
+  padding: 10px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-btn);
+  background: #fff;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  transition: border-color var(--transition-fast);
+  font-family: inherit;
+}
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--sidebar-bg);
+  box-shadow: 0 0 0 3px rgba(44,18,6,0.10);
+}
+.form-textarea { resize: vertical; min-height: 72px; }
+.form-input.error { border-color: #C0392B; }
+.field-error { font-size: 0.78rem; color: #C0392B; display: none; }
+.field-error.visible { display: block; }
+
+/* Availability row in modal */
+.modal-avail-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.modal-avail-label { font-size: 0.9rem; color: var(--color-text); }
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-border);
+}
+
+.btn-modal-cancel {
+  padding: 9px 20px;
+  border-radius: var(--radius-btn);
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  color: var(--color-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all var(--transition-fast);
+}
+.btn-modal-cancel:hover { background: rgba(43,26,16,0.06); color: var(--color-text); }
+
+.btn-modal-primary {
+  padding: 9px 22px;
+  border-radius: var(--radius-btn);
+  background: var(--sidebar-bg);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background var(--transition-fast);
+}
+.btn-modal-primary:hover { background: #1A0A03; }
+
+/* Delete confirm dialog */
+.modal-dialog.confirm-dialog { max-width: 380px; }
+.confirm-message {
+  font-size: 0.95rem;
+  color: var(--color-text);
+  line-height: 1.5;
+  padding: 20px 24px;
+}
+.btn-modal-danger {
+  padding: 9px 22px;
+  border-radius: var(--radius-btn);
+  background: #C0392B;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background var(--transition-fast);
+}
+.btn-modal-danger:hover { background: #992D22; }
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 1199px) {
+  .menu-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 767px) {
+  .admin-page-content { padding: 16px 14px 36px; }
+  .menu-grid { grid-template-columns: 1fr; gap: 14px; }
+  .menu-page-header { flex-direction: column; align-items: flex-start; }
+  .btn-add-menu { width: 100%; justify-content: center; }
+
+  /* Stack image + details on very narrow cards */
+  .menu-card-body { flex-direction: column; }
+  .menu-card-img,
+  .menu-img-placeholder {
+    width: 100%;
+    height: 180px;
+  }
+}

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seating Arrangement - CaféNest</title>
+  <meta name="description" content="Interactive seating floor plan and table reservation for CaféNest.">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/seating-arrangement.css">
+</head>
+<body class="seating-page">
+
+  <main class="seating-container">
+    
+    <!-- Top Navigation: Back to cafe -->
+    <div class="seating-top-nav">
+      <a href="cafe-details.html" class="btn-back-link" id="btn-back-cafe">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Back to cafe</span>
+      </a>
+    </div>
+
+    <!-- Cafe Information & Seating Type Badges -->
+    <header class="seating-cafe-info">
+      <h1 class="seating-cafe-title" id="seating-cafe-name">The Brew House</h1>
+      
+      <div class="seating-types-row">
+        <!-- Indoor Badge -->
+        <span class="seating-type-badge">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
+          </svg>
+          Indoor
+        </span>
+
+        <!-- Outdoor Badge -->
+        <span class="seating-type-badge">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 3a9 9 0 0 0 9 9"></path>
+          </svg>
+          Outdoor
+        </span>
+
+        <!-- Private Badge -->
+        <span class="seating-type-badge">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          Private
+        </span>
+      </div>
+    </header>
+
+    <!-- Reservation Controls Bar (Date, Time, Guests, Check Availability) -->
+    <section class="reservation-controls-bar" aria-label="Reservation Parameters">
+      
+      <!-- Date Selector -->
+      <div class="control-field-wrapper">
+        <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <select id="select-date" class="control-select" aria-label="Select Date">
+          <option value="2026-10-12" selected>12 Oct 2026</option>
+          <option value="2026-10-13">13 Oct 2026</option>
+          <option value="2026-10-14">14 Oct 2026</option>
+          <option value="2026-10-15">15 Oct 2026</option>
+        </select>
+        <svg class="chevron-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+
+      <!-- Time Selector -->
+      <div class="control-field-wrapper">
+        <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <select id="select-time" class="control-select" aria-label="Select Time">
+          <option value="16:00">04:00 PM</option>
+          <option value="17:00">05:00 PM</option>
+          <option value="18:00" selected>06:00 PM</option>
+          <option value="19:00">07:00 PM</option>
+          <option value="20:00">08:00 PM</option>
+          <option value="21:00">09:00 PM</option>
+        </select>
+        <svg class="chevron-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+
+      <!-- Guests Selector -->
+      <div class="control-field-wrapper">
+        <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <select id="select-guests" class="control-select" aria-label="Select Guests">
+          <option value="1">1 Person</option>
+          <option value="2">2 People</option>
+          <option value="3">3 People</option>
+          <option value="4" selected>4 People</option>
+          <option value="6">6 People</option>
+          <option value="8">8 People</option>
+        </select>
+        <svg class="chevron-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+
+      <!-- Check Availability CTA -->
+      <button type="button" class="btn-check-availability" id="btn-check-avail">
+        Check Availability
+      </button>
+
+    </section>
+
+    <!-- Table Status Legend -->
+    <div class="table-status-legend" aria-label="Table Status Legend">
+      <div class="legend-item">
+        <span class="legend-dot available"></span>
+        <span>Available</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot booked"></span>
+        <span>Booked</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot selected"></span>
+        <span>Selected</span>
+      </div>
+    </div>
+
+    <!-- Seating Floor Plan and Details Body -->
+    <div class="seating-body-layout">
+      
+      <!-- Seating Floor Plan Card (~78% width) -->
+      <div class="floor-plan-card" aria-label="Floor plan map">
+        <div class="floor-plan-zones">
+          
+          <!-- Indoor Seating Zone -->
+          <div class="zone-indoor" id="zone-indoor">
+            <span class="zone-badge-label">Indoor Seating</span>
+            
+            <!-- Corner Plants -->
+            <div class="floor-plant" style="top: 14px; left: 14px;">
+              <svg class="plant-icon" viewBox="0 0 24 24"><path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9a9 9 0 0 0-9-9zm0 16c-3.86 0-7-3.14-7-7 0-3.86 3.14-7 7-7s7 3.14 7 7c0 3.86-3.14 7-7 7z"></path></svg>
+            </div>
+            <div class="floor-plant" style="top: 14px; right: 14px;">
+              <svg class="plant-icon" viewBox="0 0 24 24"><path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9a9 9 0 0 0-9-9zm0 16c-3.86 0-7-3.14-7-7 0-3.86 3.14-7 7-7s7 3.14 7 7c0 3.86-3.14 7-7 7z"></path></svg>
+            </div>
+            <div class="floor-plant" style="bottom: 24px; left: 14px;">
+              <svg class="plant-icon" viewBox="0 0 24 24"><path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9a9 9 0 0 0-9-9zm0 16c-3.86 0-7-3.14-7-7 0-3.86 3.14-7 7-7s7 3.14 7 7c0 3.86-3.14 7-7 7z"></path></svg>
+            </div>
+            <div class="floor-plant" style="bottom: 24px; right: 28px;">
+              <svg class="plant-icon" viewBox="0 0 24 24"><path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9a9 9 0 0 0-9-9zm0 16c-3.86 0-7-3.14-7-7 0-3.86 3.14-7 7-7s7 3.14 7 7c0 3.86-3.14 7-7 7z"></path></svg>
+            </div>
+
+            <!-- Main Entrance at Bottom Center -->
+            <div class="main-entrance-bar">
+              <div class="entrance-doors">
+                <div class="door-leaf"></div>
+                <div class="door-leaf"></div>
+              </div>
+              <span class="entrance-label">Main Entrance</span>
+            </div>
+
+            <!-- Table nodes inserted dynamically by js/seating-arrangement.js -->
+          </div>
+
+          <!-- Outdoor Seating Zone -->
+          <div class="zone-outdoor" id="zone-outdoor">
+            <span class="zone-badge-label">Outdoor Seating</span>
+            
+            <div class="floor-plant" style="top: 14px; right: 10px;">
+              <svg class="plant-icon" viewBox="0 0 24 24"><path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9a9 9 0 0 0-9-9zm0 16c-3.86 0-7-3.14-7-7 0-3.86 3.14-7 7-7s7 3.14 7 7c0 3.86-3.14 7-7 7z"></path></svg>
+            </div>
+            <div class="floor-plant" style="bottom: 14px; left: 10px;">
+              <svg class="plant-icon" viewBox="0 0 24 24"><path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9a9 9 0 0 0-9-9zm0 16c-3.86 0-7-3.14-7-7 0-3.86 3.14-7 7-7s7 3.14 7 7c0 3.86-3.14 7-7 7z"></path></svg>
+            </div>
+
+            <!-- Outdoor Table nodes inserted dynamically by js/seating-arrangement.js -->
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Table Details Panel (~22% width) -->
+      <aside class="table-details-panel" aria-label="Selected Table Details">
+        <h2 class="panel-title">Table Details</h2>
+        
+        <div class="details-table-id" id="details-table-name">Table 7</div>
+        <div class="details-row">Capacity: <span id="details-table-cap">4</span></div>
+        <div class="details-row">Type: <span id="details-table-type">Round</span></div>
+
+        <button type="button" class="btn-book-now" id="btn-book-now">
+          Book Now
+        </button>
+      </aside>
+
+    </div>
+
+  </main>
+
+  <!-- Booking Confirmation Modal -->
+  <div class="modal-overlay" id="booking-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-dialog">
+      <h3 class="modal-title" id="modal-title">Confirm Reservation</h3>
+      <p style="color: var(--color-muted); font-size: 0.9rem;">Please review your table reservation details below:</p>
+      
+      <ul class="modal-content-list">
+        <li><span>Cafe:</span> <span id="modal-cafe-name">The Brew House</span></li>
+        <li><span>Table:</span> <span id="modal-table-num">Table 7</span></li>
+        <li><span>Date & Time:</span> <span id="modal-date-time">12 Oct 2026 at 06:00 PM</span></li>
+        <li><span>Party Size:</span> <span id="modal-guests">4 People</span></li>
+      </ul>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-modal-cancel" id="btn-modal-cancel">Cancel</button>
+        <button type="button" class="btn-modal-confirm" id="btn-modal-confirm">Confirm Booking</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Mount -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/seating-arrangement.js"></script>
+</body>
+</html>

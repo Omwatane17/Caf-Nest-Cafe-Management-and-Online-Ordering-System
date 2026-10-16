@@ -1,0 +1,465 @@
+/* ==========================================================================
+   CaféNest - Cafe Details Page Stylesheet
+   ========================================================================== */
+
+/* Hero Banner */
+.details-hero {
+  position: relative;
+  background: 
+    linear-gradient(to right, rgba(20, 10, 5, 0.90) 0%, rgba(35, 18, 9, 0.78) 50%, rgba(20, 10, 5, 0.45) 100%),
+    radial-gradient(ellipse at 70% 30%, #854924 0%, #30170A 75%);
+  background-size: cover;
+  background-position: center;
+  min-height: 320px;
+  color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Minimal Header Overlaid on Hero */
+.details-header {
+  position: relative;
+  z-index: 10;
+  padding: 16px 0;
+}
+
+.details-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Outlined Heart in Header */
+.btn-hero-heart {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-circle);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  background-color: rgba(0, 0, 0, 0.2);
+  color: var(--color-white);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.btn-hero-heart:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.btn-hero-heart svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  transition: all var(--transition-fast);
+}
+
+.btn-hero-heart[aria-pressed="true"] {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-hero-heart[aria-pressed="true"] svg {
+  fill: var(--color-white);
+  stroke: var(--color-white);
+}
+
+/* Hero Content Area */
+.details-hero-content {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 34px;
+}
+
+.hero-main-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+  gap: 24px;
+}
+
+.hero-info-col {
+  max-width: 700px;
+}
+
+.details-cafe-name {
+  font-family: var(--font-serif);
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 12px;
+  color: var(--color-white);
+}
+
+.details-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.98rem;
+  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.details-meta-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.details-meta-rating .star-icon {
+  width: 18px;
+  height: 18px;
+  fill: var(--color-star);
+  stroke: var(--color-star);
+}
+
+.details-meta-rating .reviews-count {
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.details-meta-location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.details-meta-location .pin-icon {
+  width: 16px;
+  height: 16px;
+  stroke: var(--color-star);
+  stroke-width: 2;
+  fill: none;
+}
+
+.hero-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hero-tag-pill {
+  background-color: rgba(40, 22, 12, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+}
+
+/* Book a Table Hero CTA Button */
+.btn-book-table {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  background-color: rgba(60, 30, 15, 0.7);
+  color: var(--color-white);
+  font-size: 1.05rem;
+  font-weight: 600;
+  border-radius: var(--radius-btn);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-book-table:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--color-white);
+}
+
+/* ==========================================================================
+   Tab Navigation Bar
+   ========================================================================== */
+.details-tabs-bar {
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tabs-list {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tab-btn {
+  padding: 16px 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  border-bottom: 3px solid transparent;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  background: none;
+}
+
+.tab-btn:hover {
+  color: var(--color-primary);
+}
+
+.tab-btn[aria-selected="true"] {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* ==========================================================================
+   Tab Panels & Menu Layout
+   ========================================================================== */
+.tabpanel-container {
+  padding: 32px 0 60px 0;
+}
+
+.tabpanel {
+  display: none;
+}
+
+.tabpanel.active {
+  display: block;
+}
+
+/* Placeholder for Overview, Photos, Reviews */
+.panel-placeholder {
+  background-color: var(--color-card-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 56px 24px;
+  text-align: center;
+}
+
+.panel-placeholder-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.panel-placeholder-text {
+  font-size: 0.95rem;
+  color: var(--color-muted);
+}
+
+/* Menu Card Box (matching cafe details.png) */
+.menu-card-box {
+  background-color: var(--color-card-surface);
+  border: 1px solid rgba(220, 208, 192, 0.7);
+  border-radius: var(--radius-card);
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(43, 26, 16, 0.05);
+  min-height: 520px;
+}
+
+/* Menu Category Sidebar (Left ~240px) */
+.menu-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background-color: #FAF6EE;
+  border-right: 1px solid var(--color-border);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.menu-cat-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-btn);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: left;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.menu-cat-btn:hover {
+  background-color: rgba(90, 46, 20, 0.08);
+}
+
+.menu-cat-btn[aria-current="true"] {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.menu-cat-icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  flex-shrink: 0;
+}
+
+.menu-cat-btn.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Menu Items Right Pane (Scrollable inside card) */
+.menu-items-pane {
+  flex: 1;
+  padding: 24px 28px;
+  overflow-y: auto;
+  max-height: 580px;
+}
+
+.menu-items-pane:focus-visible {
+  outline: 2px solid var(--color-star);
+}
+
+.menu-pane-heading {
+  font-family: var(--font-sans);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 20px;
+}
+
+.menu-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Item Row */
+.menu-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(220, 208, 192, 0.5);
+  gap: 16px;
+}
+
+.menu-item-row:last-child {
+  border-bottom: none;
+}
+
+.menu-item-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.menu-item-thumb {
+  width: 68px;
+  height: 68px;
+  border-radius: 8px;
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(139, 77, 36, 0.3), transparent 70%),
+    linear-gradient(135deg, #4A2610 0%, #2A1508 100%);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.menu-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.menu-item-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-item-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.menu-item-desc {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin-bottom: 4px;
+}
+
+.menu-item-price {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.btn-add-item {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  padding: 7px 16px;
+  border-radius: var(--radius-btn);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background-color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-add-item:hover {
+  background-color: var(--color-primary-hover);
+}
+
+/* Responsive Rules */
+@media (max-width: 768px) {
+  .details-cafe-name {
+    font-size: 2.1rem;
+  }
+  .hero-main-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .btn-book-table {
+    width: 100%;
+  }
+  .tabs-list {
+    overflow-x: auto;
+    gap: 20px;
+    padding-bottom: 2px;
+  }
+  .menu-card-box {
+    flex-direction: column;
+  }
+  .menu-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .menu-cat-btn {
+    white-space: nowrap;
+    width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .details-cafe-name {
+    font-size: 1.75rem;
+  }
+  .details-meta-row {
+    font-size: 0.88rem;
+  }
+  .menu-item-row {
+    align-items: flex-start;
+  }
+  .menu-item-thumb {
+    width: 56px;
+    height: 56px;
+  }
+}

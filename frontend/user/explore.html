@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore Cafes - CaféNest</title>
+  <meta name="description" content="Discover amazing cafes near you in Amravati. Filter by cuisine, facilities, price, and ratings with CaféNest.">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/explore.css">
+</head>
+<body>
+
+  <!-- SOLID HEADER VARIANT (explore cafe.png) -->
+  <header class="site-header site-header--solid">
+    <div class="container header-container">
+      
+      <!-- Brand / Logo (No tagline as observed in explore cafe.png) -->
+      <a href="index.html" class="brand" aria-label="CaféNest Home">
+        <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
+          <line x1="6" y1="2" x2="6" y2="5" />
+          <line x1="10" y1="2" x2="10" y2="5" />
+          <line x1="14" y1="2" x2="14" y2="5" />
+        </svg>
+        <div class="brand-text">
+          <span class="brand-title">CaféNest</span>
+        </div>
+      </a>
+
+      <!-- Main Navigation Links -->
+      <nav class="main-nav" id="main-nav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="explore.html" class="nav-link active" aria-current="page">Explore Cafes</a>
+        <a href="bookings.html" class="nav-link">My Bookings</a>
+      </nav>
+
+      <!-- Header Actions: Magnifier + Circular Avatar Icon -->
+      <div class="header-actions">
+        <button type="button" class="btn-icon" id="header-search-btn" aria-label="Focus search input">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+        
+        <!-- Circular Avatar Icon Button -->
+        <button type="button" class="btn-avatar" id="header-avatar-btn" aria-label="User Account">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+          </svg>
+        </button>
+
+        <!-- Mobile Nav Toggle -->
+        <button type="button" class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="main-nav">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- TWO-COLUMN EXPLORE LAYOUT -->
+  <div class="explore-layout container">
+    
+    <!-- LEFT FILTER SIDEBAR (~25%) -->
+    <aside class="filter-sidebar" id="filter-sidebar" aria-label="Filter Cafes">
+      <div class="filter-header">
+        <h2 class="filter-title">Filters</h2>
+      </div>
+
+      <form id="filters-form" onsubmit="return false;">
+        <!-- Location Group -->
+        <fieldset class="filter-group">
+          <legend class="filter-legend">Location</legend>
+          <div class="select-wrapper">
+            <select id="sidebar-location-select" class="filter-select" aria-label="Filter by location">
+              <option value="Amravati" selected>Amravati</option>
+              <option value="Nagpur">Nagpur</option>
+              <option value="Pune">Pune</option>
+              <option value="Mumbai">Mumbai</option>
+            </select>
+            <svg class="chevron-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </fieldset>
+
+        <!-- Cuisine Group -->
+        <fieldset class="filter-group">
+          <legend class="filter-legend">Cuisine</legend>
+          <ul class="filter-options-list">
+            <li>
+              <label class="filter-option-label">
+                <input type="checkbox" name="cuisine" value="Coffee">
+                <span>Coffee</span>
+              </label>
+            </li>
+            <li>
+              <label class="filter-option-label">
+                <input type="checkbox" name="cuisine" value="Tea">
+                <span>Tea</span>
+              </label>
+            </li>
+            <li>
+              <label class="filter-option-label">
+                <input type="checkbox" name="cuisine" value="Snacks">
+                <span>Snacks</span>
+              </label>
+            </li>
+            <li>
+              <label class="filter-option-label">
+                <input type="checkbox" name="cuisine" value="Desserts">
+                <span>Desserts</span>
+              </label>
+            </li>
+            <li>
+              <label class="filter-option-label">
+                <input type="checkbox" name="cuisine" value="Pizza">
+                <span>Pizza</span>
+              </label>
+            </li>
+            <li>
+              <label class="filter-option-label">
+                <input type="checkbox" name="cuisine" value="Fast Food">
+                <span>Fast Food</span>
+              </label>
+            </li>
+          </ul>
+        </fieldset>
+
+        <!-- Price Range Group -->
+        <fieldset class="filter-group">
+          <legend class="filter-legend">Price Range</legend>
+          <ul class="filter-options-list">
+            <li>
+              <label class="filter-option-label">
+                <input type="radio" name="price" value="under-300">
+                <span>Under &#8377;300</span>
+              </label>
+            </li>
+            <li>
+              <label class="filter-option-label">
+                <input type="radio" name="price" value="300-600">
+                <span>&#8377;300 &ndash; &#8377;600</span>
+              </label>
+            </li>
+            <li>
+              <label class="filter-option-label">
+                <input type="radio" name="price" value="600-900">
+                <span>&#8377;600 &ndash; &#8377;900</span>
+              </label>
+            </li>
+            <li>
+              <label class="filter-option-label">
+                <input type="radio" name="price" value="above-900">
+                <span>Above &#8377;900</span>
+              </label>
+            </li>
+          </ul>
+        </fieldset>
+
+        <!-- Facilities Group -->
+        <fieldset class="filter-group">
+          <legend class="filter-legend">Facilities</legend>
+          <ul class="filter-options-list">
+            <li>
+              <label class="filter-option-label">
+                <input type="checkbox" name="facility" value="Outdoor Seating">
+                <span>Outdoor Seating</span>
+              </label>
+            </li>
+            <li>
+              <label class="filter-option-label">
+                <input type="checkbox" name="facility" value="Indoor Seating">
+                <span>Indoor Seating</span>
+              </label>
+            </li>
+            <li>
+              <label class="filter-option-label">
+                <input type="checkbox" name="facility" value="Wi-Fi">
+                <span>Wi-Fi</span>
+              </label>
+            </li>
+            <li>
+              <label class="filter-option-label">
+                <input type="checkbox" name="facility" value="Parking">
+                <span>Parking</span>
+              </label>
+            </li>
+            <li>
+              <label class="filter-option-label">
+                <input type="checkbox" name="facility" value="Live Music">
+                <span>Live Music</span>
+              </label>
+            </li>
+          </ul>
+        </fieldset>
+
+        <!-- Clear all filters button -->
+        <div class="filter-actions">
+          <button type="button" class="btn-clear-filters" id="btn-clear-filters">Clear all filters</button>
+        </div>
+      </form>
+    </aside>
+
+    <!-- RIGHT MAIN COLUMN (~75%) -->
+    <main class="explore-main" id="explore-main" aria-labelledby="explore-title">
+      <header class="explore-page-header">
+        <h1 id="explore-title" class="explore-heading">Explore Cafes</h1>
+        <p class="explore-subheading">Discover amazing cafes near you</p>
+      </header>
+
+      <!-- Toolbar: Search Input + Sort Select -->
+      <div class="explore-toolbar">
+        <div class="explore-search-wrapper">
+          <label for="explore-search-input" class="sr-only">Search cafes by name, location or tags</label>
+          <input 
+            type="search" 
+            id="explore-search-input" 
+            class="explore-search-input" 
+            placeholder="Search cafes..." 
+            aria-label="Search cafes...">
+        </div>
+
+        <div class="explore-sort-wrapper">
+          <label for="explore-sort-select" class="sort-label">Sort by:</label>
+          <div class="sort-select-container">
+            <select id="explore-sort-select" class="sort-select">
+              <option value="popularity" selected>Popularity</option>
+              <option value="rating">Rating: High to Low</option>
+              <option value="distance">Distance: Near to Far</option>
+              <option value="price">Price: Low to High</option>
+            </select>
+            <svg class="chevron-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Screen reader aria-live announcements -->
+      <div id="results-count-live" class="sr-only" aria-live="polite"></div>
+
+      <!-- Horizontal Cards List -->
+      <ul class="cafe-list" id="explore-cafe-list" aria-label="Cafes list">
+        <!-- Rendered by js/explore.js -->
+      </ul>
+    </main>
+
+  </div>
+
+  <!-- Shared Footer Mount -->
+  <div id="site-footer-mount"></div>
+
+  <!-- Toast Notification Mount -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/explore.js"></script>
+</body>
+</html>

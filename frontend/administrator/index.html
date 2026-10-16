@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | CafeNest Admin</title>
+  <meta name="description" content="CafeNest administrator dashboard — overview of reservations, tables, menu and revenue for The Brew House.">
+  <!-- Self-contained: links only to files within frontend/administrator/ -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+  <!-- ── App Shell ── -->
+  <div class="admin-shell">
+
+    <!-- SIDEBAR (populated by renderShell() in admin.js) -->
+    <aside class="admin-sidebar" id="admin-sidebar" aria-label="Admin sidebar navigation">
+      <!-- Content injected by JS -->
+    </aside>
+
+    <!-- BACKDROP (mobile overlay) -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" role="presentation" hidden></div>
+
+    <!-- MAIN COLUMN -->
+    <div class="admin-main">
+
+      <!-- TOP BAR (populated by renderShell()) -->
+      <header class="admin-topbar" id="admin-topbar" role="banner">
+        <!-- Content injected by JS -->
+      </header>
+
+      <!-- PAGE CONTENT -->
+      <main class="admin-page-content" id="main-content" aria-label="Dashboard">
+
+        <!-- Welcome Banner mount -->
+        <div id="mount-banner"></div>
+
+        <!-- Stat Cards mount -->
+        <div id="mount-stats"></div>
+
+        <!-- Lower: Reservations + Activity (side-by-side) -->
+        <div class="dashboard-lower">
+          <div id="mount-reservations"></div>
+          <div id="mount-activity"></div>
+        </div>
+
+      </main><!-- /#main-content -->
+
+    </div><!-- /.admin-main -->
+
+  </div><!-- /.admin-shell -->
+
+  <!-- Toast container (used by showAdminToast) -->
+  <div id="admin-toast-container" class="admin-toast-container" aria-live="polite"></div>
+
+  <!-- Scripts: data first, then shell, then page -->
+  <script src="js/data.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/dashboard.js"></script>
+  <!-- Backend integration: live stats from PHP session (added for backend) -->
+  <script src="js/admin-bridge.js"></script>
+</body>
+</html>

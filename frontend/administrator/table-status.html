@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Table Status | CafeNest Admin</title>
+  <meta name="description" content="Live status of all tables in your cafe for The Brew House on CafeNest Admin.">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/table-status.css">
+</head>
+<body>
+
+  <!-- ── App Shell ── -->
+  <div class="admin-shell">
+
+    <!-- SIDEBAR (populated by renderShell('tableStatus') in admin.js) -->
+    <aside class="admin-sidebar" id="admin-sidebar" aria-label="Admin sidebar navigation"></aside>
+
+    <!-- BACKDROP (mobile drawer overlay) -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" role="presentation" hidden></div>
+
+    <!-- MAIN COLUMN -->
+    <div class="admin-main">
+
+      <!-- TOP BAR -->
+      <header class="admin-topbar" id="admin-topbar" role="banner"></header>
+
+      <!-- PAGE CONTENT -->
+      <main class="admin-page-content" id="main-content" aria-labelledby="page-heading">
+
+        <!-- Page Header -->
+        <div class="table-status-header">
+          <div>
+            <h1 class="table-status-heading" id="page-heading">Table Status</h1>
+            <p class="table-status-sub">Live status of all tables in your cafe.</p>
+          </div>
+
+          <!-- Header Right: Seating Zone Dropdown -->
+          <div class="zone-select-wrap">
+            <label for="zone-select" class="visually-hidden" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;">Select seating zone</label>
+            <select id="zone-select" class="zone-select" aria-label="Select seating zone">
+              <option value="Indoor" selected>Indoor</option>
+              <option value="Outdoor">Outdoor</option>
+              <option value="Private">Private</option>
+            </select>
+            <svg class="zone-select-arrow" viewBox="0 0 24 24" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 4-Column Table Status Cards Grid (populated dynamically by table-status.js) -->
+        <div class="table-status-grid" id="table-status-grid" role="region" aria-label="Live table status grid">
+          <!-- Rendered dynamically -->
+        </div>
+
+      </main>
+
+    </div><!-- /.admin-main -->
+  </div><!-- /.admin-shell -->
+
+  <!-- Toast Notification Container -->
+  <div id="admin-toast-container" class="admin-toast-container" aria-live="polite"></div>
+
+  <!-- Scripts: data -> admin shell -> table status logic -->
+  <script src="js/data.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/table-status.js"></script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu &amp; Prices | CafeNest Admin</title>
+  <meta name="description" content="Manage menu items and prices for The Brew House on CafeNest Admin.">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/menu.css">
+</head>
+<body>
+
+  <!-- ── App Shell ── -->
+  <div class="admin-shell">
+
+    <!-- SIDEBAR (populated by renderShell('menu') in admin.js) -->
+    <aside class="admin-sidebar" id="admin-sidebar" aria-label="Admin sidebar navigation"></aside>
+
+    <!-- BACKDROP (mobile overlay) -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" role="presentation" hidden></div>
+
+    <!-- MAIN COLUMN -->
+    <div class="admin-main">
+
+      <!-- TOP BAR -->
+      <header class="admin-topbar" id="admin-topbar" role="banner"></header>
+
+      <!-- PAGE CONTENT -->
+      <main class="admin-page-content" id="main-content" aria-labelledby="page-heading">
+
+        <!-- Page Header -->
+        <div class="menu-page-header">
+          <div>
+            <h1 class="menu-page-heading" id="page-heading">Menu &amp; Prices</h1>
+            <p class="menu-page-sub">Manage your cafe's menu items and prices.</p>
+          </div>
+          <button type="button" class="btn-add-menu" id="btn-add-menu" aria-label="Add new menu item">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Menu Item
+          </button>
+        </div>
+
+        <!-- Category Filter Pills (rendered by menu.js) -->
+        <div class="category-filters" id="menu-filters" role="group" aria-label="Filter menu by category"></div>
+
+        <!-- Menu Card Grid (rendered by menu.js) -->
+        <div class="menu-grid" id="menu-grid" aria-label="Menu items"></div>
+
+      </main>
+
+    </div><!-- /.admin-main -->
+  </div><!-- /.admin-shell -->
+
+  <!-- ================================================================
+       ADD / EDIT MENU ITEM MODAL
+       ================================================================ -->
+  <div class="modal-backdrop" id="modal-item" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">Add Menu Item</h2>
+        <button type="button" class="btn-modal-close" id="btn-modal-close" aria-label="Close dialog">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <form class="modal-body" id="form-menu-item" novalidate>
+        <!-- Item Name -->
+        <div class="form-group">
+          <label for="field-name" class="form-label">Item Name <span aria-hidden="true">*</span></label>
+          <input type="text" id="field-name" class="form-input" placeholder="e.g. Cappuccino" required autocomplete="off">
+          <span class="field-error" id="err-name" role="alert" aria-live="polite"></span>
+        </div>
+
+        <!-- Category -->
+        <div class="form-group">
+          <label for="field-category" class="form-label">Category</label>
+          <select id="field-category" class="form-select">
+            <option value="Coffee">Coffee</option>
+            <option value="Tea">Tea</option>
+            <option value="Snacks">Snacks</option>
+            <option value="Main Course">Main Course</option>
+            <option value="Desserts">Desserts</option>
+            <option value="Beverages">Beverages</option>
+          </select>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label for="field-description" class="form-label">Description</label>
+          <textarea id="field-description" class="form-textarea" placeholder="Short description..." rows="2"></textarea>
+        </div>
+
+        <!-- Price -->
+        <div class="form-group">
+          <label for="field-price" class="form-label">Price (₹) <span aria-hidden="true">*</span></label>
+          <input type="number" id="field-price" class="form-input" placeholder="e.g. 120" min="0" step="1" required>
+          <span class="field-error" id="err-price" role="alert" aria-live="polite"></span>
+        </div>
+
+        <!-- Availability -->
+        <div class="form-group">
+          <span class="form-label" id="avail-label">Availability</span>
+          <div class="modal-avail-row" aria-labelledby="avail-label">
+            <label class="avail-switch" aria-label="Toggle availability">
+              <input type="checkbox" id="field-available" checked>
+              <span class="avail-track"></span>
+            </label>
+            <span class="modal-avail-label">Available</span>
+          </div>
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-cancel" id="btn-modal-cancel">Cancel</button>
+        <button type="submit" form="form-menu-item" class="btn-modal-primary" id="btn-modal-save">Save Item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       DELETE CONFIRMATION MODAL
+       ================================================================ -->
+  <div class="modal-backdrop" id="modal-confirm" hidden role="dialog" aria-modal="true" aria-labelledby="confirm-heading">
+    <div class="modal-dialog confirm-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title" id="confirm-heading">Delete Menu Item</h2>
+        <button type="button" class="btn-modal-close" aria-label="Close dialog"
+          onclick="document.getElementById('modal-confirm').setAttribute('hidden','');">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <p class="confirm-message" id="confirm-msg">Are you sure you want to delete this menu item?</p>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-cancel" id="btn-confirm-cancel">Cancel</button>
+        <button type="button" class="btn-modal-danger" id="btn-confirm-delete">Delete Item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="admin-toast-container" class="admin-toast-container" aria-live="polite"></div>
+
+  <!-- Scripts: data → shell → page -->
+  <script src="js/data.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/menu.js"></script>
+</body>
+</html>
