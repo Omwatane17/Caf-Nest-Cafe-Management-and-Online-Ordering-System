@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Menu{% endblock %}
+{% block meta_desc %}Browse CafeNest's full menu - coffees, beverages, snacks, mains and desserts. Order online for pickup or delivery.{% endblock %}
+{% block nav_menu %}active{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="container" style="padding-top:2rem;padding-bottom:4rem">
+
+    <!-- Header -->
+    <div class="mb-3">
+      <h1 class="display-font" style="font-size:clamp(1.75rem,4vw,3rem)">Our Menu</h1>
+      <p class="text-muted mt-1">Fresh ingredients, crafted with love</p>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="search-bar flex-1">
+        <span class="search-bar-icon">🔍</span>
+        <input type="text" id="menu-search" class="form-input" placeholder="Search menu..." autocomplete="off">
+      </div>
+      <select id="menu-sort" class="form-select filter-select">
+        <option value="">Sort By</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="name_asc">Name A-Z</option>
+      </select>
+      <select id="menu-veg" class="form-select filter-select">
+        <option value="">All Items</option>
+        <option value="1">Veg Only</option>
+        <option value="0">Non-Veg</option>
+      </select>
+    </div>
+
+    <!-- Category Pills -->
+    <div class="category-pills mb-3" id="menu-categories">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Results count -->
+    <p class="text-sm text-muted mb-2" id="results-count"></p>
+
+    <!-- Items Grid -->
+    <div class="grid grid-auto gap-3" id="menu-grid">
+      <div class="loading-overlay" style="grid-column:1/-1"><div class="spinner-lg spinner"></div></div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allItems=[], filteredItems=[], activeCategory=0;
+
+async function initMenu(){
+  // Load categories
+  const {data:cData} = await apiGet('/api/menu/categories');
+  const catEl = document.getElementById('menu-categories');
+  if(cData?.data){
+    const cats = [{category_id:0,name:'All Items',icon:'🍽'},...cData.data];
+    catEl.innerHTML = cats.map(c=>
+      `<button class="category-pill ${c.category_id===activeCategory?'active':''}" data-cat="${c.category_id}" onclick="filterCat(${c.category_id})">${c.icon||''} ${c.name}</button>`
+    ).join('');
+  }
+  // Load all items
+  await loadItems();
+  // URL param: ?cat=
+  const p = new URLSearchParams(location.search);
+  if(p.get('cat')) filterCat(parseInt(p.get('cat')));
+}
+
+async function loadItems(){
+  const {data} = await apiGet('/api/menu/?available=1');
+  allItems = data?.data || [];
+  applyFilters();
+}
+
+function filterCat(catId){
+  activeCategory = catId;
+  document.querySelectorAll('.category-pill').forEach(p=>{
+    p.classList.toggle('active', parseInt(p.dataset.cat)===catId);
+  });
+  applyFilters();
+}
+
+function applyFilters(){
+  const q = document.getElementById('menu-search').value.toLowerCase().trim();
+  const veg = document.getElementById('menu-veg').value;
+  const sort = document.getElementById('menu-sort').value;
+  filteredItems = allItems.filter(i=>{
+    if(activeCategory && i.category_id!==activeCategory) return false;
+    if(q && !i.name.toLowerCase().includes(q) && !(i.description||'').toLowerCase().includes(q)) return false;
+    if(veg!=='' && String(i.is_veg?1:0)!==veg) return false;
+    return true;
+  });
+  if(sort==='price_asc') filteredItems.sort((a,b)=>a.price-b.price);
+  else if(sort==='price_desc') filteredItems.sort((a,b)=>b.price-a.price);
+  else if(sort==='name_asc') filteredItems.sort((a,b)=>a.name.localeCompare(b.name));
+  renderItems();
+}
+
+function renderItems(){
+  const grid = document.getElementById('menu-grid');
+  const count = document.getElementById('results-count');
+  if(count) count.textContent = filteredItems.length ? `Showing ${filteredItems.length} item${filteredItems.length===1?'':'s'}` : '';
+  if(filteredItems.length===0){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-state-icon">🍽</div>
+      <p class="empty-state-title">No items found</p>
+      <p class="empty-state-text">Try adjusting your search or filters</p>
+      <button class="btn btn-secondary btn-sm" onclick="resetFilters()">Reset Filters</button>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = filteredItems.map(item=>{
+    const avail = item.is_available;
+    return `<div class="food-card ${avail?'':'food-unavailable'}">
+      <div class="food-card-img-wrap">
+        <img src="/static/images/${item.image_url||'placeholder.jpg'}" onerror="imgError(this)" alt="${item.name}" loading="lazy">
+        <div class="food-card-badges">
+          ${item.is_veg!==undefined?`<span class="badge ${item.is_veg?'badge-success':'badge-error'}" style="font-size:.65rem">${item.is_veg?'●Veg':'●Non-Veg'}</span>`:''}
+          ${!avail?'<span class="badge badge-muted">Unavailable</span>':''}
+        </div>
+      </div>
+      <div class="food-card-body">
+        <div class="food-card-name">${item.name}</div>
+        <div class="food-card-desc">${item.description||'Freshly prepared, just for you.'}</div>
+        <div class="food-card-footer">
+          <span class="food-price">${formatCurrency(item.price)}</span>
+          ${avail?`<button class="btn btn-primary btn-sm" onclick="addToCart(${item.menu_id},'${item.name.replace(/'/g,"\'")}',this)">+ Add</button>`:'<span class="badge badge-muted">Unavailable</span>'}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function resetFilters(){
+  document.getElementById('menu-search').value='';
+  document.getElementById('menu-sort').value='';
+  document.getElementById('menu-veg').value='';
+  filterCat(0);
+}
+
+async function addToCart(id,name,btn){
+  setLoading(btn,true);
+  const {ok,data} = await apiPost('/api/cart/add',{menu_id:id,quantity:1});
+  setLoading(btn,false);
+  if(ok && data.success){ showToast(`${name} added!`,'success'); refreshCartBadge(); }
+  else if(data?.message?.includes('Login')){ showToast('Please login first','warning'); setTimeout(()=>window.location.href='/login',1200); }
+  else showToast(data?.message||'Error','error');
+}
+
+let searchTimer;
+document.getElementById('menu-search').addEventListener('input',()=>{ clearTimeout(searchTimer); searchTimer=setTimeout(applyFilters,300); });
+document.getElementById('menu-sort').addEventListener('change',applyFilters);
+document.getElementById('menu-veg').addEventListener('change',applyFilters);
+document.addEventListener('DOMContentLoaded',initMenu);
+</script>
+{% endblock %}

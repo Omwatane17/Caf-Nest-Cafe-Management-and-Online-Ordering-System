@@ -1,0 +1,105 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Tables{% endblock %}
+{% block page_title %}Table Management{% endblock %}
+{% block nav_tables %}active{% endblock %}
+
+{% block admin_content %}
+<div class="flex justify-between items-center mb-3">
+  <p class="text-muted text-sm" id="tables-count"></p>
+  <button class="btn btn-primary" onclick="openTableModal()">+ Add Table</button>
+</div>
+<div class="grid grid-4 gap-3" id="tables-grid">
+  <div class="loading-overlay" style="grid-column:1/-1"><div class="spinner-lg spinner"></div></div>
+</div>
+
+<div class="modal-overlay hidden" id="table-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h2 class="modal-title" id="table-modal-title">Add Table</h2>
+      <button class="modal-close" onclick="closeTableModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Table Number *</label><input id="t-number" class="form-input" placeholder="e.g. T1, A3"></div>
+      <div class="form-group"><label class="form-label">Capacity (seats) *</label><input id="t-capacity" type="number" min="1" class="form-input" value="4"></div>
+      <div class="form-group"><label class="form-label">Location</label><input id="t-location" class="form-input" placeholder="e.g. Indoor, Window, Terrace"></div>
+      <div class="form-group" id="t-status-group" style="display:none">
+        <label class="form-label">Status</label>
+        <select id="t-status" class="form-select">
+          <option value="available">Available</option>
+          <option value="occupied">Occupied</option>
+          <option value="reserved">Reserved</option>
+          <option value="maintenance">Maintenance</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeTableModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTable()">Save Table</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let editTableId=null;
+const statusColors={available:'badge-success',occupied:'badge-error',reserved:'badge-warning',maintenance:'badge-muted'};
+const statusIcons={available:'✅',occupied:'🔴',reserved:'⏰',maintenance:'🔧'};
+
+async function loadTables(){
+  const grid=document.getElementById('tables-grid');
+  const {ok,data}=await apiGet('/api/tables/');
+  if(!ok||!data.success){ grid.innerHTML='<p class="text-muted">Failed to load tables</p>'; return; }
+  const tables=data.data||[];
+  document.getElementById('tables-count').textContent=`${tables.length} table${tables.length===1?'':'s'} configured`;
+  if(!tables.length){ grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">🪑</div><p class="empty-state-title">No tables yet</p><button class="btn btn-primary btn-sm" onclick="openTableModal()">Add First Table</button></div>'; return; }
+  grid.innerHTML=tables.map(t=>`
+    <div class="card text-center" style="padding:1.5rem 1rem">
+      <div style="font-size:2rem;margin-bottom:.5rem">🪑</div>
+      <h3 style="font-size:1.125rem;font-weight:700">Table ${t.table_number}</h3>
+      <p class="text-sm text-muted mb-1">${t.capacity} seats${t.location?` · ${t.location}`:''}</p>
+      <span class="badge ${statusColors[t.status]||'badge-muted'} mb-2">${statusIcons[t.status]||''} ${t.status}</span>
+      <div class="flex gap-1 justify-center mt-2">
+        <button class="btn btn-sm btn-ghost" onclick="editTable(${t.table_id})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteTable(${t.table_id},'${t.table_number}')">Del</button>
+      </div>
+    </div>`).join('');
+}
+
+function openTableModal(){ editTableId=null; document.getElementById('table-modal-title').textContent='Add Table'; document.getElementById('t-number').value=''; document.getElementById('t-capacity').value='4'; document.getElementById('t-location').value=''; document.getElementById('t-status-group').style.display='none'; document.getElementById('table-modal').classList.remove('hidden'); }
+function closeTableModal(){ document.getElementById('table-modal').classList.add('hidden'); }
+
+function editTable(id){
+  const {ok,data}=apiGet(`/api/tables/${id}`).then(({ok,data})=>{
+    if(!ok||!data.success) return;
+    const t=data.data; editTableId=id;
+    document.getElementById('table-modal-title').textContent=`Edit Table ${t.table_number}`;
+    document.getElementById('t-number').value=t.table_number;
+    document.getElementById('t-capacity').value=t.capacity;
+    document.getElementById('t-location').value=t.location||'';
+    document.getElementById('t-status').value=t.status;
+    document.getElementById('t-status-group').style.display='';
+    document.getElementById('table-modal').classList.remove('hidden');
+  });
+}
+
+async function saveTable(){
+  const body={table_number:document.getElementById('t-number').value.trim(),capacity:parseInt(document.getElementById('t-capacity').value),location:document.getElementById('t-location').value.trim()};
+  if(editTableId) body.status=document.getElementById('t-status').value;
+  if(!body.table_number){ showToast('Table number required','warning'); return; }
+  const {ok,data}=editTableId?await apiPut(`/api/tables/${editTableId}`,body):await apiPost('/api/tables/',body);
+  if(ok&&data.success){ showToast(editTableId?'Updated!':'Added!','success'); closeTableModal(); loadTables(); }
+  else showToast(data?.message||'Failed','error');
+}
+
+async function deleteTable(id,num){
+  const yes=await showConfirm('Delete Table',`Delete Table ${num}?`);
+  if(!yes) return;
+  const {ok,data}=await apiDelete(`/api/tables/${id}`);
+  if(ok&&data.success){ showToast('Deleted!','success'); loadTables(); }
+  else showToast(data?.message||'Failed','error');
+}
+
+document.addEventListener('DOMContentLoaded',loadTables);
+</script>
+{% endblock %}

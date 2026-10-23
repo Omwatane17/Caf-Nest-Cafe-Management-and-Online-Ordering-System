@@ -1,0 +1,104 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block nav_dash %}active{% endblock %}
+
+{% block admin_content %}
+<div class="grid grid-4 gap-3 mb-4" id="stats-grid">
+  <div class="stat-card"><div class="stat-icon stat-icon-primary">💰</div><div class="stat-body"><div class="stat-label">Today's Revenue</div><div class="stat-value" id="stat-today">₹—</div></div></div>
+  <div class="stat-card"><div class="stat-icon stat-icon-success">📋</div><div class="stat-body"><div class="stat-label">This Month Orders</div><div class="stat-value" id="stat-month-count">—</div></div></div>
+  <div class="stat-card"><div class="stat-icon stat-icon-info">👥</div><div class="stat-body"><div class="stat-label">Total Customers</div><div class="stat-value" id="stat-customers">—</div></div></div>
+  <div class="stat-card"><div class="stat-icon stat-icon-warning">⚠️</div><div class="stat-body"><div class="stat-label">Low Stock Items</div><div class="stat-value" id="stat-lowstock">—</div></div></div>
+</div>
+
+<div class="grid grid-2 gap-3">
+  <!-- Recent Orders -->
+  <div class="card" style="overflow:hidden;padding:0">
+    <div class="flex justify-between items-center" style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)">
+      <h2 style="font-size:1rem;font-weight:700">Recent Orders</h2>
+      <a href="/admin/orders" class="btn btn-ghost btn-sm">View All →</a>
+    </div>
+    <div class="table-wrap" style="border:none;border-radius:0">
+      <table id="recent-orders-table">
+        <thead><tr><th>#</th><th>Customer</th><th>Total</th><th>Status</th><th>Time</th></tr></thead>
+        <tbody><tr><td colspan="5" class="text-center text-muted" style="padding:2rem">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <!-- Popular Items -->
+  <div class="card" style="overflow:hidden;padding:0">
+    <div class="flex justify-between items-center" style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)">
+      <h2 style="font-size:1rem;font-weight:700">Popular Items</h2>
+      <a href="/admin/reports" class="btn btn-ghost btn-sm">Reports →</a>
+    </div>
+    <div class="table-wrap" style="border:none;border-radius:0">
+      <table id="popular-table">
+        <thead><tr><th>Item</th><th>Sold</th><th>Revenue</th></tr></thead>
+        <tbody><tr><td colspan="3" class="text-center text-muted" style="padding:2rem">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Low Stock Alert -->
+<div class="card mt-3" id="low-stock-card" style="display:none">
+  <div class="flex justify-between items-center mb-2">
+    <h2 style="font-size:1rem;font-weight:700">⚠️ Low Stock Alerts</h2>
+    <a href="/admin/inventory" class="btn btn-ghost btn-sm">Manage Inventory →</a>
+  </div>
+  <div class="table-wrap">
+    <table id="low-stock-table">
+      <thead><tr><th>Item</th><th>Current Stock</th><th>Reorder Level</th><th>Unit</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadDashboard(){
+  const {ok,data}=await apiGet('/api/reports/dashboard');
+  if(!ok||!data.success) return;
+  const d=data.data;
+  document.getElementById('stat-today').textContent=formatCurrency(d.today?.total||0);
+  document.getElementById('stat-month-count').textContent=d.month?.count||0;
+  document.getElementById('stat-customers').textContent=d.total_customers||0;
+  document.getElementById('stat-lowstock').textContent=d.low_stock?.length||0;
+
+  // Recent orders
+  const tbody=document.querySelector('#recent-orders-table tbody');
+  if(d.recent_orders?.length){
+    tbody.innerHTML=d.recent_orders.map(o=>`<tr>
+      <td><a href="/admin/orders?id=${o.order_id}" style="color:var(--primary)">#${o.order_id}</a></td>
+      <td>${o.customer_name||'—'}</td>
+      <td style="color:var(--primary);font-weight:600">${formatCurrency(o.total)}</td>
+      <td>${orderStatusBadge(o.status)}</td>
+      <td class="text-sm text-muted">${formatDate(o.created_at)}</td>
+    </tr>`).join('');
+  } else tbody.innerHTML='<tr><td colspan="5" class="text-center text-muted" style="padding:2rem">No orders yet</td></tr>';
+
+  // Popular items
+  const ptbody=document.querySelector('#popular-table tbody');
+  if(d.popular_items?.length){
+    ptbody.innerHTML=d.popular_items.slice(0,8).map((i,idx)=>`<tr>
+      <td>${idx+1}. ${i.name}</td>
+      <td>${i.total_sold}</td>
+      <td style="color:var(--primary)">${formatCurrency(i.revenue)}</td>
+    </tr>`).join('');
+  } else ptbody.innerHTML='<tr><td colspan="3" class="text-center text-muted" style="padding:2rem">No data</td></tr>';
+
+  // Low stock
+  if(d.low_stock?.length){
+    document.getElementById('low-stock-card').style.display='';
+    document.querySelector('#low-stock-table tbody').innerHTML=d.low_stock.map(i=>`<tr>
+      <td>${i.item_name}</td>
+      <td><span style="color:var(--error);font-weight:700">${i.quantity}</span></td>
+      <td>${i.reorder_level}</td>
+      <td class="text-muted">${i.unit}</td>
+    </tr>`).join('');
+  }
+}
+document.addEventListener('DOMContentLoaded',loadDashboard);
+</script>
+{% endblock %}

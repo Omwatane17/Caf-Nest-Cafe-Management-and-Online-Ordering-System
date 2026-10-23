@@ -1,0 +1,188 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Menu Management{% endblock %}
+{% block page_title %}Menu & Categories{% endblock %}
+{% block nav_menu %}active{% endblock %}
+
+{% block admin_content %}
+<div class="flex gap-2 mb-3 flex-wrap">
+  <button class="btn btn-primary" onclick="openMenuModal()">+ Add Menu Item</button>
+  <button class="btn btn-secondary" onclick="openCatModal()">+ Add Category</button>
+</div>
+
+<!-- Categories -->
+<div class="card mb-3" style="padding:1.25rem">
+  <h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem">Categories</h2>
+  <div class="flex gap-2 flex-wrap" id="cat-list"><div class="spinner"></div></div>
+</div>
+
+<!-- Category Pills Filter -->
+<div class="category-pills mb-2" id="menu-cat-filter"><div class="spinner"></div></div>
+
+<!-- Menu Items Table -->
+<div class="table-wrap">
+  <table id="menu-table">
+    <thead><tr><th>Item</th><th>Category</th><th>Price</th><th>Veg</th><th>Available</th><th>Actions</th></tr></thead>
+    <tbody><tr><td colspan="6" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr></tbody>
+  </table>
+</div>
+
+<!-- Menu Item Modal -->
+<div class="modal-overlay hidden" id="menu-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="menu-modal-title">Add Menu Item</h2>
+      <button class="modal-close" onclick="closeMenuModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Name *</label><input id="m-name" class="form-input" placeholder="Item name"></div>
+      <div class="form-group"><label class="form-label">Category *</label>
+        <select id="m-cat" class="form-select"><option value="">Select category</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Price (₹) *</label><input id="m-price" type="number" step="0.01" class="form-input" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">Description</label><textarea id="m-desc" class="form-input" rows="2"></textarea></div>
+      <div class="form-group"><label class="form-label">Image File</label><input id="m-img" class="form-input" placeholder="espresso.jpg"></div>
+      <div class="flex gap-3">
+        <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="m-veg" checked> Vegetarian</label>
+        <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="m-avail" checked> Available</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeMenuModal()">Cancel</button>
+      <button class="btn btn-primary" id="menu-modal-save" onclick="saveMenuItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category Modal -->
+<div class="modal-overlay hidden" id="cat-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h2 class="modal-title" id="cat-modal-title">Add Category</h2>
+      <button class="modal-close" onclick="closeCatModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Category Name *</label><input id="cat-name" class="form-input" placeholder="e.g. Beverages"></div>
+      <div class="form-group"><label class="form-label">Icon (emoji)</label><input id="cat-icon" class="form-input" placeholder="☕"></div>
+      <div class="form-group"><label class="form-label">Description</label><input id="cat-desc" class="form-input" placeholder="Optional description"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCatModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCat()">Save Category</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allMenuItems=[], categories=[], editMenuId=null, editCatId=null, activeCatFilter=0;
+
+async function loadData(){
+  const [{data:cData},{data:mData}]=await Promise.all([apiGet('/api/menu/categories'),apiGet('/api/menu/admin/all')]);
+  categories=cData?.data||[];
+  allMenuItems=mData?.data||[];
+  renderCategories(); renderCatFilter(); renderMenu();
+}
+
+function renderCategories(){
+  const list=document.getElementById('cat-list');
+  if(!categories.length){ list.innerHTML='<p class="text-muted text-sm">No categories yet</p>'; return; }
+  list.innerHTML=categories.map(c=>`
+    <div class="flex items-center gap-1 card-raised" style="padding:.5rem .75rem;border-radius:var(--radius)">
+      <span>${c.icon||'🍽'}</span>
+      <span class="font-semibold text-sm">${c.name}</span>
+      <button class="btn btn-icon btn-ghost btn-sm" onclick="editCat(${c.category_id})" title="Edit">✏️</button>
+      <button class="btn btn-icon btn-ghost btn-sm" style="color:var(--error)" onclick="deleteCat(${c.category_id},'${c.name.replace(/'/g,"\'")}')" title="Delete">🗑</button>
+    </div>`).join('');
+}
+function renderCatFilter(){
+  const f=document.getElementById('menu-cat-filter');
+  const cats=[{category_id:0,name:'All Items',icon:'🍽'},...categories];
+  f.innerHTML=cats.map(c=>`<button class="category-pill ${c.category_id===activeCatFilter?'active':''}" onclick="setCatFilter(${c.category_id})">${c.icon||''} ${c.name}</button>`).join('');
+}
+function setCatFilter(id){ activeCatFilter=id; renderCatFilter(); renderMenu(); }
+function renderMenu(){
+  const tbody=document.querySelector('#menu-table tbody');
+  const items=activeCatFilter?allMenuItems.filter(i=>i.category_id===activeCatFilter):allMenuItems;
+  if(!items.length){ tbody.innerHTML='<tr><td colspan="6" class="text-center text-muted" style="padding:2rem">No items</td></tr>'; return; }
+  tbody.innerHTML=items.map(i=>`<tr>
+    <td><strong>${i.name}</strong>${i.description?`<br><span class="text-xs text-muted">${i.description.substring(0,40)}...</span>`:''}</td>
+    <td>${categories.find(c=>c.category_id===i.category_id)?.name||'—'}</td>
+    <td style="color:var(--primary);font-weight:700">${formatCurrency(i.price)}</td>
+    <td>${i.is_veg?'<span class="badge badge-success">Veg</span>':'<span class="badge badge-error">Non-Veg</span>'}</td>
+    <td>${i.is_available?'<span class="badge badge-success">Yes</span>':'<span class="badge badge-muted">No</span>'}</td>
+    <td><div class="flex gap-1">
+      <button class="btn btn-sm btn-ghost" onclick="editMenuItem(${i.menu_id})">Edit</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteMenuItem(${i.menu_id},'${i.name.replace(/'/g,"\'")}')">Delete</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+function openMenuModal(){ editMenuId=null; document.getElementById('menu-modal-title').textContent='Add Menu Item'; clearMenuForm(); populateCatSelect(); document.getElementById('menu-modal').classList.remove('hidden'); }
+function closeMenuModal(){ document.getElementById('menu-modal').classList.add('hidden'); }
+function clearMenuForm(){ ['m-name','m-price','m-desc','m-img'].forEach(id=>document.getElementById(id).value=''); document.getElementById('m-veg').checked=true; document.getElementById('m-avail').checked=true; document.getElementById('m-cat').value=''; }
+function populateCatSelect(){ const s=document.getElementById('m-cat'); s.innerHTML='<option value="">Select category</option>'+categories.map(c=>`<option value="${c.category_id}">${c.name}</option>`).join(''); }
+
+function editMenuItem(id){
+  const item=allMenuItems.find(i=>i.menu_id===id); if(!item) return;
+  editMenuId=id;
+  document.getElementById('menu-modal-title').textContent='Edit Menu Item';
+  populateCatSelect();
+  document.getElementById('m-name').value=item.name;
+  document.getElementById('m-cat').value=item.category_id;
+  document.getElementById('m-price').value=item.price;
+  document.getElementById('m-desc').value=item.description||'';
+  document.getElementById('m-img').value=item.image_url||'';
+  document.getElementById('m-veg').checked=!!item.is_veg;
+  document.getElementById('m-avail').checked=!!item.is_available;
+  document.getElementById('menu-modal').classList.remove('hidden');
+}
+
+async function saveMenuItem(){
+  const btn=document.getElementById('menu-modal-save');
+  const body={name:document.getElementById('m-name').value.trim(),category_id:parseInt(document.getElementById('m-cat').value),
+    price:parseFloat(document.getElementById('m-price').value),description:document.getElementById('m-desc').value.trim(),
+    image_url:document.getElementById('m-img').value.trim(),is_veg:document.getElementById('m-veg').checked,
+    is_available:document.getElementById('m-avail').checked};
+  if(!body.name||!body.category_id||!body.price){ showToast('Name, category and price required','warning'); return; }
+  setLoading(btn,true);
+  const {ok,data}=editMenuId?await apiPut(`/api/menu/admin/${editMenuId}`,body):await apiPost('/api/menu/admin/',body);
+  setLoading(btn,false);
+  if(ok&&data.success){ showToast(editMenuId?'Item updated!':'Item added!','success'); closeMenuModal(); loadData(); }
+  else showToast(data?.message||'Failed','error');
+}
+
+async function deleteMenuItem(id,name){
+  const yes=await showConfirm('Delete Item',`Delete "${name}"? This cannot be undone.`);
+  if(!yes) return;
+  const {ok,data}=await apiDelete(`/api/menu/admin/${id}`);
+  if(ok&&data.success){ showToast('Deleted!','success'); loadData(); }
+  else showToast(data?.message||'Failed','error');
+}
+
+function openCatModal(){ editCatId=null; document.getElementById('cat-modal-title').textContent='Add Category'; ['cat-name','cat-icon','cat-desc'].forEach(id=>document.getElementById(id).value=''); document.getElementById('cat-modal').classList.remove('hidden'); }
+function closeCatModal(){ document.getElementById('cat-modal').classList.add('hidden'); }
+function editCat(id){
+  const c=categories.find(x=>x.category_id===id); if(!c) return;
+  editCatId=id; document.getElementById('cat-modal-title').textContent='Edit Category';
+  document.getElementById('cat-name').value=c.name; document.getElementById('cat-icon').value=c.icon||''; document.getElementById('cat-desc').value=c.description||'';
+  document.getElementById('cat-modal').classList.remove('hidden');
+}
+async function saveCat(){
+  const body={name:document.getElementById('cat-name').value.trim(),icon:document.getElementById('cat-icon').value.trim(),description:document.getElementById('cat-desc').value.trim()};
+  if(!body.name){ showToast('Category name required','warning'); return; }
+  const {ok,data}=editCatId?await apiPut(`/api/menu/admin/categories/${editCatId}`,body):await apiPost('/api/menu/admin/categories',body);
+  if(ok&&data.success){ showToast(editCatId?'Category updated!':'Category added!','success'); closeCatModal(); loadData(); }
+  else showToast(data?.message||'Failed','error');
+}
+async function deleteCat(id,name){
+  const yes=await showConfirm('Delete Category',`Delete "${name}"?`);
+  if(!yes) return;
+  const {ok,data}=await apiDelete(`/api/menu/admin/categories/${id}`);
+  if(ok&&data.success){ showToast('Deleted!','success'); loadData(); }
+  else showToast(data?.message||'Failed','error');
+}
+
+document.addEventListener('DOMContentLoaded',loadData);
+</script>
+{% endblock %}

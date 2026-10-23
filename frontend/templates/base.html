@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="{% block meta_desc %}CafeNest - Premium cafe experience. Order your favorite food and drinks online.{% endblock %}">
+<title>{% block title %}CafeNest{% endblock %} | CafeNest</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>">
+<link rel="stylesheet" href="/static/css/styles.css">
+{% block head_extra %}{% endblock %}
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" id="main-navbar">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo" id="nav-logo">
+      <div class="nav-logo-icon">☕</div>
+      Cafe<span>Nest</span>
+    </a>
+    <div class="nav-links" id="nav-links">
+      <a href="/" class="nav-link {% block nav_home %}{% endblock %}">Home</a>
+      <a href="/menu" class="nav-link {% block nav_menu %}{% endblock %}">Menu</a>
+      <a href="/orders" class="nav-link {% block nav_orders %}{% endblock %}" id="nav-orders-link" style="display:none">My Orders</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-ghost btn-icon nav-cart-btn" id="cart-toggle-btn" title="Cart" aria-label="Open cart">
+        🛒 <span class="cart-badge" id="cart-count"></span>
+      </button>
+      <div id="nav-auth-area">
+        <a href="/login" class="btn btn-secondary btn-sm" id="nav-login-btn">Login</a>
+      </div>
+    </div>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div id="toast-container"></div>
+
+<!-- Cart Sidebar -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header">
+    <h2 class="font-bold" style="font-size:1.125rem">🛒 Your Cart</h2>
+    <button class="btn btn-ghost btn-icon modal-close" id="cart-close-btn">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items-list">
+    <div class="loading-overlay"><div class="spinner-lg spinner"></div></div>
+  </div>
+  <div class="cart-footer" id="cart-footer" style="display:none">
+    <div class="cart-total"><span>Total</span><span id="cart-total-val">₹0.00</span></div>
+    <a href="/checkout" class="btn btn-primary btn-block" id="cart-checkout-btn">Proceed to Checkout</a>
+    <button class="btn btn-ghost btn-sm btn-block mt-1" id="cart-clear-btn" style="margin-top:.5rem">Clear Cart</button>
+  </div>
+</aside>
+
+{% block content %}{% endblock %}
+
+{% block footer %}
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>☕ CafeNest</h3>
+        <p>Your cozy corner for premium brews, delicious bites, and warm vibes. Order online or dine in — we've got you covered.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <div class="footer-links">
+          <a href="/">Home</a>
+          <a href="/menu">Menu</a>
+          <a href="/orders">My Orders</a>
+          <a href="/login">Login</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <div class="footer-links">
+          <a href="#">📍 Cafe Street, City</a>
+          <a href="#">📞 +91 98765 43210</a>
+          <a href="#">✉ hello@cafenest.in</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">&copy; 2024 CafeNest. All rights reserved.</p>
+      <p class="footer-copy">Made with ☕ &amp; ❤</p>
+    </div>
+  </div>
+</footer>
+{% endblock %}
+
+<script src="/static/js/utils.js"></script>
+<script>
+// Auth-aware navbar
+(async()=>{
+  try {
+    const {ok,data} = await apiGet('/api/auth/me');
+    const authArea = document.getElementById('nav-auth-area');
+    const ordersLink = document.getElementById('nav-orders-link');
+    if(ok && data.success) {
+      const u = data.data;
+      if(ordersLink) ordersLink.style.display='';
+      authArea.innerHTML = `
+        <div class="flex items-center gap-1">
+          <span class="text-sm text-muted">${u.name?.split(' ')[0]||'You'}</span>
+          <a href="/profile" class="btn btn-ghost btn-sm">Profile</a>
+          <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+        </div>`;
+    }
+  } catch(e){}
+})();
+
+// Cart sidebar
+const cartSidebar = document.getElementById('cart-sidebar');
+const cartOverlay = document.getElementById('cart-overlay');
+const cartToggle = document.getElementById('cart-toggle-btn');
+const cartClose = document.getElementById('cart-close-btn');
+function openCart(){ cartSidebar.classList.add('open'); cartOverlay.classList.add('open'); loadCart(); }
+function closeCart(){ cartSidebar.classList.remove('open'); cartOverlay.classList.remove('open'); }
+if(cartToggle) cartToggle.addEventListener('click', openCart);
+if(cartClose) cartClose.addEventListener('click', closeCart);
+if(cartOverlay) cartOverlay.addEventListener('click', closeCart);
+
+async function loadCart(){
+  const list = document.getElementById('cart-items-list');
+  const footer = document.getElementById('cart-footer');
+  if(!list) return;
+  list.innerHTML='<div class="loading-overlay"><div class="spinner-lg spinner"></div></div>';
+  const {ok,data} = await apiGet('/api/cart/');
+  if(!ok || !data.success){ list.innerHTML='<div class="empty-state"><div class="empty-state-icon">🛒</div><p class="empty-state-text">Could not load cart</p></div>'; return; }
+  const items = data.data?.items||[];
+  if(items.length===0){
+    list.innerHTML='<div class="empty-state"><div class="empty-state-icon">🛒</div><p class="empty-state-title">Cart is empty</p><p class="empty-state-text">Add some items from our menu!</p><a href="/menu" class="btn btn-primary btn-sm">Browse Menu</a></div>';
+    if(footer) footer.style.display='none';
+    return;
+  }
+  list.innerHTML = items.map(i=>`
+    <div class="cart-item">
+      <img class="cart-item-img" src="/static/images/${i.image_url||'placeholder.jpg'}" onerror="imgError(this)" alt="${i.name}">
+      <div class="cart-item-info">
+        <div class="cart-item-name">${i.name}</div>
+        <div class="cart-item-price">${formatCurrency(i.price)}</div>
+      </div>
+      <div class="flex items-center gap-1">
+        <div class="qty-control">
+          <button class="qty-btn" onclick="updateCartItem(${i.menu_id},${i.quantity-1})">−</button>
+          <span class="qty-val">${i.quantity}</span>
+          <button class="qty-btn" onclick="updateCartItem(${i.menu_id},${i.quantity+1})">+</button>
+        </div>
+        <button class="btn btn-icon btn-ghost btn-sm" onclick="removeCartItem(${i.menu_id})" title="Remove">🗑</button>
+      </div>
+    </div>`).join('');
+  const total = data.data?.total || 0;
+  document.getElementById('cart-total-val').textContent = formatCurrency(total);
+  if(footer) footer.style.display='';
+}
+async function updateCartItem(id,qty){
+  if(qty<1){await removeCartItem(id);return;}
+  await apiPost('/api/cart/update',{menu_id:id,quantity:qty});
+  loadCart(); refreshCartBadge();
+}
+async function removeCartItem(id){
+  await apiPost('/api/cart/remove',{menu_id:id});
+  loadCart(); refreshCartBadge();
+}
+document.getElementById('cart-clear-btn')?.addEventListener('click',async()=>{
+  await apiPost('/api/cart/clear',{});
+  loadCart(); refreshCartBadge();
+});
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

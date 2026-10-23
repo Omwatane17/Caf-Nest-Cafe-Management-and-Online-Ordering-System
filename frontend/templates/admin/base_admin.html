@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Dashboard{% endblock %} | CafeNest Admin</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>">
+<link rel="stylesheet" href="/static/css/styles.css">
+{% block head_extra %}{% endblock %}
+</head>
+<body>
+<div id="toast-container"></div>
+
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-header">
+      <div class="sidebar-logo">☕ Cafe<span>Nest</span></div>
+      <div class="text-xs text-muted mt-1" id="admin-role-label">Admin Panel</div>
+    </div>
+    <nav class="admin-sidebar-nav">
+      <div class="sidebar-section-label">Overview</div>
+      <a href="/admin" class="sidebar-nav-item {% block nav_dash %}{% endblock %}">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <div class="sidebar-section-label">Operations</div>
+      <a href="/admin/orders" class="sidebar-nav-item {% block nav_orders %}{% endblock %}">
+        <span class="nav-icon">🧾</span> Orders
+      </a>
+      <a href="/admin/tables" class="sidebar-nav-item {% block nav_tables %}{% endblock %}">
+        <span class="nav-icon">🪑</span> Tables
+      </a>
+      <div class="sidebar-section-label">Catalogue</div>
+      <a href="/admin/menu" class="sidebar-nav-item {% block nav_menu %}{% endblock %}">
+        <span class="nav-icon">🍽</span> Menu & Categories
+      </a>
+      <div class="sidebar-section-label">Backend</div>
+      <a href="/admin/inventory" class="sidebar-nav-item {% block nav_inv %}{% endblock %}">
+        <span class="nav-icon">📦</span> Inventory
+      </a>
+      <a href="/admin/suppliers" class="sidebar-nav-item {% block nav_sup %}{% endblock %}">
+        <span class="nav-icon">🏭</span> Suppliers
+      </a>
+      <div class="sidebar-section-label">People</div>
+      <a href="/admin/staff" class="sidebar-nav-item {% block nav_staff %}{% endblock %}">
+        <span class="nav-icon">👥</span> Staff
+      </a>
+      <div class="sidebar-section-label">Analytics</div>
+      <a href="/admin/reports" class="sidebar-nav-item {% block nav_reports %}{% endblock %}">
+        <span class="nav-icon">📈</span> Reports
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/" class="sidebar-nav-item" style="font-size:.85rem">
+        <span class="nav-icon">🌐</span> View Site
+      </a>
+      <button class="sidebar-nav-item" onclick="staffLogout()" style="color:var(--error)">
+        <span class="nav-icon">🚪</span> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div class="flex items-center gap-2">
+        <button class="btn btn-ghost btn-icon sidebar-toggle-btn" id="sidebar-toggle" style="display:none" aria-label="Toggle sidebar">☰</button>
+        <h1 class="admin-page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-muted" id="admin-name-label">Loading...</span>
+        <a href="/" class="btn btn-ghost btn-sm">View Site</a>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      {% block admin_content %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+<!-- Confirm Dialog -->
+<div class="modal-overlay hidden" id="confirm-dialog">
+  <div class="modal" style="max-width:380px;text-align:center">
+    <div class="confirm-icon danger" id="conf-icon" style="width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.75rem;margin:0 auto 1rem;background:var(--error-bg)">🗑️</div>
+    <h3 class="modal-title confirm-title mb-2">Confirm Delete</h3>
+    <p class="text-muted text-sm confirm-message mb-3">This action cannot be undone.</p>
+    <div class="flex gap-2 justify-center">
+      <button class="btn btn-ghost" data-confirm-action="no">Cancel</button>
+      <button class="btn btn-danger" data-confirm-action="yes">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/utils.js"></script>
+<script>
+// Auth guard
+(async()=>{
+  const {ok,data}=await apiGet('/api/auth/staff/me');
+  if(!ok||!data.success){ window.location.href='/admin/login'; return; }
+  const s=data.data;
+  document.getElementById('admin-name-label').textContent=s.name||'Staff';
+  document.getElementById('admin-role-label').textContent=s.role?.charAt(0).toUpperCase()+s.role?.slice(1)||'Staff';
+})();
+
+// Sidebar toggle for mobile
+document.getElementById('sidebar-toggle')?.addEventListener('click',()=>{
+  document.getElementById('admin-sidebar').classList.toggle('open');
+});
+
+// Confirm dialog
+let _confResolve=null;
+function showConfirm(title,msg,type='danger'){
+  return new Promise(r=>{
+    _confResolve=r;
+    document.querySelector('.confirm-title').textContent=title;
+    document.querySelector('.confirm-message').textContent=msg;
+    document.getElementById('confirm-dialog').classList.remove('hidden');
+  });
+}
+document.querySelectorAll('[data-confirm-action]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.getElementById('confirm-dialog').classList.add('hidden');
+    if(_confResolve){ _confResolve(btn.dataset.confirmAction==='yes'); _confResolve=null; }
+  });
+});
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

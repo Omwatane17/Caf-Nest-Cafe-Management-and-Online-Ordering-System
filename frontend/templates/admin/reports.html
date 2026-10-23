@@ -1,0 +1,121 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Analytics & Reports{% endblock %}
+{% block nav_reports %}active{% endblock %}
+
+{% block admin_content %}
+<!-- Period selector -->
+<div class="flex gap-2 mb-3 flex-wrap">
+  <button class="category-pill active" data-period="month" onclick="setPeriod('month')">This Month</button>
+  <button class="category-pill" data-period="week" onclick="setPeriod('week')">This Week</button>
+  <button class="category-pill" data-period="today" onclick="setPeriod('today')">Today</button>
+  <button class="category-pill" data-period="year" onclick="setPeriod('year')">This Year</button>
+</div>
+
+<!-- Summary Stats -->
+<div class="grid grid-4 gap-3 mb-4" id="report-stats">
+  <div class="stat-card"><div class="stat-icon stat-icon-primary">💰</div><div class="stat-body"><div class="stat-label">Revenue</div><div class="stat-value" id="r-revenue">—</div></div></div>
+  <div class="stat-card"><div class="stat-icon stat-icon-success">📋</div><div class="stat-body"><div class="stat-label">Orders</div><div class="stat-value" id="r-orders">—</div></div></div>
+  <div class="stat-card"><div class="stat-icon stat-icon-info">💎</div><div class="stat-body"><div class="stat-label">Avg Order Value</div><div class="stat-value" id="r-avg">—</div></div></div>
+  <div class="stat-card"><div class="stat-icon stat-icon-warning">👥</div><div class="stat-body"><div class="stat-label">Total Customers</div><div class="stat-value" id="r-cust">—</div></div></div>
+</div>
+
+<div class="grid grid-2 gap-3">
+  <!-- Revenue chart (simple bar) -->
+  <div class="card" style="padding:1.5rem">
+    <h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem">Revenue Trend</h2>
+    <div id="revenue-chart" style="display:flex;align-items:flex-end;gap:4px;height:180px;">
+      <div class="spinner"></div>
+    </div>
+    <div id="chart-labels" style="display:flex;gap:4px;margin-top:.5rem;overflow:hidden"></div>
+  </div>
+
+  <!-- Order Status Breakdown -->
+  <div class="card" style="padding:1.5rem">
+    <h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem">Order Status Breakdown</h2>
+    <div id="status-breakdown"><div class="loading-overlay"><div class="spinner"></div></div></div>
+  </div>
+</div>
+
+<!-- Top Items -->
+<div class="card mt-3" style="overflow:hidden;padding:0">
+  <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)"><h2 style="font-size:1rem;font-weight:700">Top Selling Items</h2></div>
+  <div class="table-wrap" style="border:none;border-radius:0">
+    <table id="top-items-table">
+      <thead><tr><th>#</th><th>Item</th><th>Units Sold</th><th>Revenue</th></tr></thead>
+      <tbody><tr><td colspan="4" class="text-center text-muted" style="padding:2rem"><div class="spinner"></div></td></tr></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentPeriod='month';
+function setPeriod(p){
+  currentPeriod=p;
+  document.querySelectorAll('[data-period]').forEach(b=>b.classList.toggle('active',b.dataset.period===p));
+  loadReports();
+}
+
+async function loadReports(){
+  const [{ok:dok,data:dashData},{ok:rok,data:salesData}]=await Promise.all([
+    apiGet('/api/reports/dashboard'),apiGet(`/api/reports/sales?period=${currentPeriod}`)
+  ]);
+  if(dok&&dashData.success){
+    const d=dashData.data;
+    const periodKey=currentPeriod==='today'?'today':currentPeriod==='week'?'week':currentPeriod==='year'?'all_time':'month';
+    const pData=d[periodKey]||d.month;
+    document.getElementById('r-revenue').textContent=formatCurrency(pData?.total||0);
+    document.getElementById('r-orders').textContent=pData?.count||0;
+    const avg=pData?.count>0?pData.total/pData.count:0;
+    document.getElementById('r-avg').textContent=formatCurrency(avg);
+    document.getElementById('r-cust').textContent=d.total_customers||0;
+    // Status breakdown
+    const sEl=document.getElementById('status-breakdown');
+    const total=d.status_breakdown?.reduce((a,b)=>a+b.count,0)||1;
+    const colors={pending:'var(--warning)',confirmed:'var(--info)',preparing:'var(--info)',ready:'var(--primary)',delivered:'var(--success)',cancelled:'var(--error)'};
+    sEl.innerHTML=(d.status_breakdown||[]).map(s=>`
+      <div class="flex items-center gap-2 mb-2">
+        <span style="width:80px;font-size:.8rem;font-weight:600;color:${colors[s.status]||'var(--text-muted)'}">${s.status}</span>
+        <div style="flex:1;height:20px;background:var(--bg-raised);border-radius:var(--radius-full);overflow:hidden">
+          <div style="height:100%;width:${Math.round(s.count/total*100)}%;background:${colors[s.status]||'var(--border)'};border-radius:var(--radius-full);transition:width .5s ease"></div>
+        </div>
+        <span class="text-sm font-bold" style="width:30px;text-align:right">${s.count}</span>
+      </div>`).join('');
+    // Top items
+    const tbody=document.querySelector('#top-items-table tbody');
+    if(d.popular_items?.length){
+      tbody.innerHTML=d.popular_items.map((i,idx)=>`<tr>
+        <td style="color:var(--text-faint);font-weight:700">${idx+1}</td>
+        <td><strong>${i.name}</strong></td>
+        <td>${i.total_sold}</td>
+        <td style="color:var(--primary);font-weight:700">${formatCurrency(i.revenue)}</td>
+      </tr>`).join('');
+    } else tbody.innerHTML='<tr><td colspan="4" class="text-center text-muted" style="padding:2rem">No sales data</td></tr>';
+  }
+  // Revenue chart
+  if(rok&&salesData.success){
+    const rows=salesData.data||[];
+    const chart=document.getElementById('revenue-chart');
+    const labels=document.getElementById('chart-labels');
+    if(!rows.length){ chart.innerHTML='<p class="text-muted text-sm">No data for this period</p>'; labels.innerHTML=''; return; }
+    const maxRev=Math.max(...rows.map(r=>r.revenue),1);
+    chart.innerHTML=rows.map(r=>{
+      const pct=Math.max(4,Math.round(r.revenue/maxRev*100));
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px" title="${formatCurrency(r.revenue)}">
+        <span style="font-size:.6rem;color:var(--text-faint)">${formatCurrency(r.revenue)}</span>
+        <div style="width:100%;height:${pct}%;background:linear-gradient(180deg,var(--primary),var(--primary-dark));border-radius:4px 4px 0 0"></div>
+      </div>`;
+    }).join('');
+    const step=Math.ceil(rows.length/8);
+    labels.style.cssText='display:flex;gap:4px;margin-top:.5rem;overflow:hidden';
+    labels.innerHTML=rows.map((r,i)=>
+      `<div style="flex:1;font-size:.55rem;color:var(--text-faint);text-align:center;overflow:hidden;white-space:nowrap">${i%step===0?r.date:''}</div>`
+    ).join('');
+  }
+}
+
+document.addEventListener('DOMContentLoaded',loadReports);
+</script>
+{% endblock %}

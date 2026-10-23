@@ -1,0 +1,83 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Suppliers{% endblock %}
+{% block page_title %}Supplier Management{% endblock %}
+{% block nav_sup %}active{% endblock %}
+
+{% block admin_content %}
+<div class="flex justify-between items-center mb-3">
+  <p class="text-sm text-muted" id="sup-count"></p>
+  <button class="btn btn-primary" onclick="openSupModal()">+ Add Supplier</button>
+</div>
+<div class="table-wrap">
+  <table id="sup-table">
+    <thead><tr><th>Supplier Name</th><th>Contact</th><th>Phone</th><th>Email</th><th>Address</th><th>Actions</th></tr></thead>
+    <tbody><tr><td colspan="6" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr></tbody>
+  </table>
+</div>
+
+<div class="modal-overlay hidden" id="sup-modal">
+  <div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="sup-modal-title">Add Supplier</h2><button class="modal-close" onclick="closeSupModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Supplier Name *</label><input id="sp-name" class="form-input" placeholder="Company name"></div>
+      <div class="form-group"><label class="form-label">Contact Person</label><input id="sp-contact" class="form-input" placeholder="Contact name"></div>
+      <div class="grid grid-2 gap-2">
+        <div class="form-group"><label class="form-label">Phone</label><input id="sp-phone" type="tel" class="form-input" placeholder="+91..."></div>
+        <div class="form-group"><label class="form-label">Email</label><input id="sp-email" type="email" class="form-input" placeholder="supplier@..."></div>
+      </div>
+      <div class="form-group"><label class="form-label">Address</label><textarea id="sp-addr" class="form-input" rows="2" placeholder="Full address"></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeSupModal()">Cancel</button><button class="btn btn-primary" onclick="saveSup()">Save</button></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let editSupId=null;
+async function loadSuppliers(){
+  const tbody=document.querySelector('#sup-table tbody');
+  const {ok,data}=await apiGet('/api/inventory/suppliers');
+  if(!ok||!data.success){ tbody.innerHTML='<tr><td colspan="6" class="text-center text-muted" style="padding:2rem">Failed</td></tr>'; return; }
+  const sups=data.data||[];
+  document.getElementById('sup-count').textContent=`${sups.length} supplier${sups.length===1?'':'s'}`;
+  if(!sups.length){ tbody.innerHTML='<tr><td colspan="6" class="text-center text-muted" style="padding:2rem">No suppliers yet</td></tr>'; return; }
+  tbody.innerHTML=sups.map(s=>`<tr>
+    <td><strong>${s.supplier_name}</strong></td>
+    <td class="text-muted">${s.contact_name||'—'}</td>
+    <td class="text-muted">${s.phone||'—'}</td>
+    <td class="text-muted">${s.email||'—'}</td>
+    <td class="text-sm text-muted">${s.address||'—'}</td>
+    <td><div class="flex gap-1">
+      <button class="btn btn-sm btn-ghost" onclick="editSup(${s.supplier_id})">Edit</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteSup(${s.supplier_id},'${s.supplier_name.replace(/'/g,"\'")}')">Del</button>
+    </div></td>
+  </tr>`).join('');
+}
+function openSupModal(){ editSupId=null; document.getElementById('sup-modal-title').textContent='Add Supplier'; ['sp-name','sp-contact','sp-phone','sp-email','sp-addr'].forEach(id=>document.getElementById(id).value=''); document.getElementById('sup-modal').classList.remove('hidden'); }
+function closeSupModal(){ document.getElementById('sup-modal').classList.add('hidden'); }
+async function editSup(id){
+  const {ok,data}=await apiGet(`/api/inventory/suppliers`); if(!ok) return;
+  const s=data.data?.find(x=>x.supplier_id===id); if(!s) return;
+  editSupId=id; document.getElementById('sup-modal-title').textContent=`Edit ${s.supplier_name}`;
+  document.getElementById('sp-name').value=s.supplier_name; document.getElementById('sp-contact').value=s.contact_name||'';
+  document.getElementById('sp-phone').value=s.phone||''; document.getElementById('sp-email').value=s.email||'';
+  document.getElementById('sp-addr').value=s.address||''; document.getElementById('sup-modal').classList.remove('hidden');
+}
+async function saveSup(){
+  const body={supplier_name:document.getElementById('sp-name').value.trim(),contact_name:document.getElementById('sp-contact').value.trim(),phone:document.getElementById('sp-phone').value.trim(),email:document.getElementById('sp-email').value.trim(),address:document.getElementById('sp-addr').value.trim()};
+  if(!body.supplier_name){ showToast('Supplier name required','warning'); return; }
+  const {ok,data}=editSupId?await apiPut(`/api/inventory/suppliers/${editSupId}`,body):await apiPost('/api/inventory/suppliers',body);
+  if(ok&&data.success){ showToast(editSupId?'Updated!':'Added!','success'); closeSupModal(); loadSuppliers(); }
+  else showToast(data?.message||'Failed','error');
+}
+async function deleteSup(id,name){
+  const yes=await showConfirm('Delete Supplier',`Delete "${name}"?`);
+  if(!yes) return;
+  const {ok,data}=await apiDelete(`/api/inventory/suppliers/${id}`);
+  if(ok&&data.success){ showToast('Deleted!','success'); loadSuppliers(); }
+  else showToast(data?.message||'Failed','error');
+}
+document.addEventListener('DOMContentLoaded',loadSuppliers);
+</script>
+{% endblock %}

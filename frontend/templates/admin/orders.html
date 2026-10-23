@@ -1,0 +1,108 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Orders{% endblock %}
+{% block page_title %}Order Management{% endblock %}
+{% block nav_orders %}active{% endblock %}
+
+{% block admin_content %}
+<div class="flex justify-between items-center mb-3 flex-wrap gap-2">
+  <div class="flex gap-2 flex-wrap" id="status-filters">
+    <button class="category-pill active" data-status="" onclick="filterStatus('')">All</button>
+    <button class="category-pill" data-status="pending" onclick="filterStatus('pending')">⏳ Pending</button>
+    <button class="category-pill" data-status="confirmed" onclick="filterStatus('confirmed')">✓ Confirmed</button>
+    <button class="category-pill" data-status="preparing" onclick="filterStatus('preparing')">🍳 Preparing</button>
+    <button class="category-pill" data-status="ready" onclick="filterStatus('ready')">🔔 Ready</button>
+    <button class="category-pill" data-status="delivered" onclick="filterStatus('delivered')">✅ Delivered</button>
+    <button class="category-pill" data-status="cancelled" onclick="filterStatus('cancelled')">✕ Cancelled</button>
+  </div>
+  <button class="btn btn-ghost btn-sm" onclick="loadOrders()">↺ Refresh</button>
+</div>
+
+<div class="table-wrap">
+  <table id="orders-table">
+    <thead><tr><th>#</th><th>Customer</th><th>Type</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+    <tbody><tr><td colspan="8" class="text-center text-muted" style="padding:2rem"><div class="spinner"></div></td></tr></tbody>
+  </table>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="modal-overlay hidden" id="order-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h2 class="modal-title" id="order-modal-title">Order Details</h2>
+      <button class="modal-close" onclick="closeOrderModal()">✕</button>
+    </div>
+    <div class="modal-body" id="order-modal-body"><div class="loading-overlay"><div class="spinner-lg spinner"></div></div></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentStatus='';
+
+async function loadOrders(){
+  const tbody=document.querySelector('#orders-table tbody');
+  tbody.innerHTML='<tr><td colspan="8" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr>';
+  const url='/api/orders/admin/all'+(currentStatus?`?status=${currentStatus}`:'');
+  const {ok,data}=await apiGet(url);
+  if(!ok||!data.success){ tbody.innerHTML='<tr><td colspan="8" class="text-center text-muted" style="padding:2rem">Failed to load</td></tr>'; return; }
+  const orders=data.data||[];
+  if(!orders.length){ tbody.innerHTML='<tr><td colspan="8" class="text-center text-muted" style="padding:2rem">No orders found</td></tr>'; return; }
+  const transitions={pending:['confirmed','cancelled'],confirmed:['preparing','cancelled'],preparing:['ready'],ready:['delivered'],delivered:[],cancelled:[]};
+  tbody.innerHTML=orders.map(o=>{
+    const nexts=transitions[o.status]||[];
+    const btns=nexts.map(s=>`<button class="btn btn-sm btn-ghost" onclick="updateStatus(${o.order_id},'${s}')">${s}</button>`).join('');
+    return `<tr>
+      <td><span style="color:var(--primary);cursor:pointer;font-weight:600" onclick="viewOrder(${o.order_id})">#${o.order_id}</span></td>
+      <td>${o.customer_name||'—'}</td>
+      <td class="text-sm text-muted">${o.order_type||'—'}</td>
+      <td style="font-weight:700;color:var(--primary)">${formatCurrency(o.total)}</td>
+      <td>${paymentStatusBadge(o.payment_status||'completed')}</td>
+      <td>${orderStatusBadge(o.status)}</td>
+      <td class="text-sm text-muted">${formatDate(o.created_at)}</td>
+      <td><div class="flex gap-1 flex-wrap">${btns}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterStatus(s){
+  currentStatus=s;
+  document.querySelectorAll('#status-filters .category-pill').forEach(p=>{
+    p.classList.toggle('active',p.dataset.status===s);
+  });
+  loadOrders();
+}
+
+async function updateStatus(id,status){
+  const {ok,data}=await apiPut(`/api/orders/admin/${id}/status`,{status});
+  if(ok&&data.success){ showToast(`Order #${id} → ${status}`,'success'); loadOrders(); }
+  else showToast(data?.message||'Failed','error');
+}
+
+async function viewOrder(id){
+  const modal=document.getElementById('order-modal');
+  const body=document.getElementById('order-modal-body');
+  document.getElementById('order-modal-title').textContent=`Order #${id}`;
+  body.innerHTML='<div class="loading-overlay"><div class="spinner-lg spinner"></div></div>';
+  modal.classList.remove('hidden');
+  const {ok,data}=await apiGet(`/api/orders/admin/${id}`);
+  if(!ok||!data.success){ body.innerHTML='<p class="text-muted">Could not load.</p>'; return; }
+  const o=data.data;
+  body.innerHTML=`
+    <div class="grid grid-2 gap-2 text-sm mb-3">
+      <div class="card-raised p-2"><span class="text-muted">Customer:</span><br><strong>${o.customer_name}</strong><br><span class="text-muted">${o.customer_email}</span></div>
+      <div class="card-raised p-2"><span class="text-muted">Status:</span><br>${orderStatusBadge(o.status)}<br><span class="text-muted">${formatDate(o.created_at)}</span></div>
+      <div class="card-raised p-2"><span class="text-muted">Payment:</span><br><strong>${o.payment_method||'—'}</strong> ${paymentStatusBadge(o.payment_status||'completed')}</div>
+      <div class="card-raised p-2"><span class="text-muted">Total:</span><br><strong style="color:var(--primary);font-size:1.25rem">${formatCurrency(o.total)}</strong></div>
+    </div>
+    ${o.transaction_ref?`<p class="text-xs text-muted mb-2">Ref: <code style="color:var(--primary)">${o.transaction_ref}</code></p>`:''}
+    <div class="table-wrap"><table>
+      <thead><tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr></thead>
+      <tbody>${(o.items||[]).map(i=>`<tr><td>${i.name}</td><td>${i.quantity}</td><td>${formatCurrency(i.unit_price)}</td><td style="color:var(--primary)">${formatCurrency(i.subtotal)}</td></tr>`).join('')}</tbody>
+    </table></div>`;
+}
+function closeOrderModal(){ document.getElementById('order-modal').classList.add('hidden'); }
+
+document.addEventListener('DOMContentLoaded',loadOrders);
+</script>
+{% endblock %}

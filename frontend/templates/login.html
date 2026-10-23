@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block meta_desc %}Login to CafeNest to order food and track your orders.{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="display:flex;align-items:center;justify-content:center;min-height:100vh">
+  <div class="container-sm" style="max-width:440px;padding:2rem 1.5rem">
+    <div class="card" style="padding:2.5rem">
+      <div class="text-center mb-3">
+        <div style="font-size:3rem;margin-bottom:.75rem">☕</div>
+        <h1 style="font-size:1.75rem;font-family:'Playfair Display',serif">Welcome Back</h1>
+        <p class="text-muted text-sm mt-1">Sign in to your CafeNest account</p>
+      </div>
+      <div id="login-error" class="alert alert-error mb-2" style="display:none"></div>
+      <form id="login-form" novalidate>
+        <div class="flex flex-col gap-3">
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <input type="email" id="email" class="form-input" placeholder="you@example.com" required autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <div class="relative">
+              <input type="password" id="password" class="form-input" placeholder="Your password" required autocomplete="current-password" style="padding-right:3rem">
+              <button type="button" id="pw-toggle" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:.875rem">Show</button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-btn">Sign In</button>
+        </div>
+      </form>
+      <div class="divider-text">New to CafeNest?</div>
+      <a href="/register" class="btn btn-secondary btn-block">Create Account</a>
+      <p class="text-center text-xs text-muted mt-2">
+        Staff? <a href="/admin/login" style="color:var(--primary)">Admin Login →</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('pw-toggle').addEventListener('click',function(){
+  const pw=document.getElementById('password');
+  const isText=pw.type==='text';
+  pw.type=isText?'password':'text';
+  this.textContent=isText?'Show':'Hide';
+});
+document.getElementById('login-form').addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  const btn=document.getElementById('login-btn');
+  const errEl=document.getElementById('login-error');
+  const email=document.getElementById('email').value.trim();
+  const password=document.getElementById('password').value;
+  if(!email||!password){ errEl.textContent='Please fill all fields.'; errEl.style.display='flex'; return; }
+  setLoading(btn,true); errEl.style.display='none';
+  const {ok,data}=await apiPost('/api/auth/login',{email,password});
+  setLoading(btn,false);
+  if(ok && data.success){ showToast('Welcome back!','success'); setTimeout(()=>window.location.href=new URLSearchParams(location.search).get('next')||'/',800); }
+  else { errEl.textContent=data?.message||'Login failed. Check credentials.'; errEl.style.display='flex'; }
+});
+// Redirect if already logged in
+(async()=>{ const {ok}=await apiGet('/api/auth/me'); if(ok) window.location.href='/'; })();
+</script>
+{% endblock %}

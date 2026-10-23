@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin Login | CafeNest</title>
+<link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body style="display:flex;align-items:center;justify-content:center;min-height:100vh">
+<div id="toast-container"></div>
+<div style="max-width:420px;width:100%;padding:1.5rem">
+  <div class="card" style="padding:2.5rem">
+    <div class="text-center mb-3">
+      <div style="font-size:3rem;margin-bottom:.75rem">🔐</div>
+      <h1 style="font-size:1.75rem;font-family:'Playfair Display',serif">Admin Login</h1>
+      <p class="text-muted text-sm mt-1">CafeNest Staff Portal</p>
+    </div>
+    <div id="login-error" class="alert alert-error mb-2" style="display:none"></div>
+    <form id="admin-login-form" novalidate>
+      <div class="flex flex-col gap-3">
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input type="email" id="email" class="form-input" placeholder="admin@cafenest.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" class="form-input" placeholder="Password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-btn">Sign In to Admin</button>
+      </div>
+    </form>
+    <p class="text-center text-xs text-muted mt-3"><a href="/">← Back to Site</a></p>
+  </div>
+</div>
+<script src="/static/js/utils.js"></script>
+<script>
+document.getElementById('admin-login-form').addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  const btn=document.getElementById('login-btn');
+  const errEl=document.getElementById('login-error');
+  const email=document.getElementById('email').value.trim();
+  const password=document.getElementById('password').value;
+  if(!email||!password){ errEl.textContent='Fill all fields.'; errEl.style.display='flex'; return; }
+  setLoading(btn,true); errEl.style.display='none';
+  const {ok,data}=await apiPost('/api/auth/staff/login',{email,password});
+  setLoading(btn,false);
+  if(ok&&data.success){ showToast('Welcome!','success'); setTimeout(()=>window.location.href='/admin',800); }
+  else{ errEl.textContent=data?.message||'Login failed.'; errEl.style.display='flex'; }
+});
+(async()=>{ const {ok}=await apiGet('/api/auth/staff/me'); if(ok) window.location.href='/admin'; })();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+﻿# Byte-order mark stripped UTF-8 .gitignore for CafeNest
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+flask_sessions/
+*.log
+.DS_Store
+Thumbs.db
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+env/
+node_modules/

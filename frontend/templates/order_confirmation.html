@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Order Confirmed{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="display:flex;align-items:center;justify-content:center;min-height:100vh">
+  <div class="container-sm text-center" style="max-width:560px;padding:2rem">
+    <div class="card" style="padding:3rem 2rem">
+      <div id="conf-icon" style="font-size:4rem;margin-bottom:1.5rem;animation:pop .5s ease">✅</div>
+      <h1 class="display-font mb-2" style="font-size:2rem">Order Confirmed!</h1>
+      <p class="text-muted mb-3">Your order has been received and is being prepared.</p>
+      <div id="order-summary" class="card-raised p-3 mb-3 text-left">
+        <div class="spinner"></div>
+      </div>
+      <!-- Status Tracker -->
+      <div class="order-status-track" id="status-track">
+        <div class="status-step">
+          <div class="status-dot done">✓</div>
+          <div class="status-label done">Placed</div>
+        </div>
+        <div class="status-line done" id="line-1"></div>
+        <div class="status-step">
+          <div class="status-dot current" id="dot-confirmed">✓</div>
+          <div class="status-label current">Confirmed</div>
+        </div>
+        <div class="status-line" id="line-2"></div>
+        <div class="status-step">
+          <div class="status-dot" id="dot-preparing">🍳</div>
+          <div class="status-label">Preparing</div>
+        </div>
+        <div class="status-line" id="line-3"></div>
+        <div class="status-step">
+          <div class="status-dot" id="dot-ready">🔔</div>
+          <div class="status-label">Ready</div>
+        </div>
+      </div>
+      <div class="flex gap-2 justify-center flex-wrap mt-2">
+        <a href="/orders" class="btn btn-primary">View My Orders</a>
+        <a href="/menu" class="btn btn-ghost">Order More</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>@keyframes pop{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}</style>
+<script>
+const orderId = new URLSearchParams(location.search).get('order_id');
+async function loadOrder(){
+  if(!orderId) return;
+  const {ok,data}=await apiGet(`/api/orders/my/${orderId}`);
+  const sumEl=document.getElementById('order-summary');
+  if(!ok||!data.success){ sumEl.innerHTML='<p class="text-muted">Could not load order details.</p>'; return; }
+  const o=data.data;
+  sumEl.innerHTML=`
+    <div class="flex justify-between mb-1"><span class="text-muted">Order #</span><strong>#${o.order_id}</strong></div>
+    <div class="flex justify-between mb-1"><span class="text-muted">Status</span>${orderStatusBadge(o.status)}</div>
+    <div class="flex justify-between mb-1"><span class="text-muted">Payment</span><span>${o.payment_method||'—'} ${paymentStatusBadge(o.payment_status||'completed')}</span></div>
+    <div class="flex justify-between mb-1"><span class="text-muted">Total</span><strong style="color:var(--primary)">${formatCurrency(o.total)}</strong></div>
+    <div class="flex justify-between"><span class="text-muted">Placed</span><span class="text-sm">${formatDate(o.created_at)}</span></div>`;
+  updateTracker(o.status);
+}
+function updateTracker(status){
+  const steps=['pending','confirmed','preparing','ready','delivered'];
+  const idx=steps.indexOf(status);
+  ['confirmed','preparing','ready'].forEach((s,i)=>{
+    const dot=document.getElementById(`dot-${s}`);
+    const line=document.getElementById(`line-${i+1}`);
+    if(dot){ dot.className='status-dot'+(idx>i+1?' done':idx===i+1?' current':''); }
+    if(line){ line.className='status-line'+(idx>i+1?' done':''); }
+  });
+}
+document.addEventListener('DOMContentLoaded',loadOrder);
+</script>
+{% endblock %}

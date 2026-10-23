@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block meta_desc %}CafeNest - Premium cafe experience with delicious food and beverages. Order online for dine-in, takeaway or delivery.{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container hero-content">
+    <div style="max-width:660px">
+      <div class="hero-eyebrow">Premium Cafe Experience</div>
+      <h1 class="hero-title">
+        Where Every Sip<br>Feels Like <span class="highlight">Home</span>
+      </h1>
+      <p class="hero-subtitle">
+        Crafted coffees, artisan food, and a warm atmosphere — all available for dine-in, takeaway, or delivery. Order online in seconds.
+      </p>
+      <div class="hero-actions">
+        <a href="/menu" class="btn btn-primary btn-lg" id="hero-order-btn">Order Now →</a>
+        <a href="#featured" class="btn btn-ghost btn-lg">Explore Menu</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-value">50+</div><div class="hero-stat-label">Menu Items</div></div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat"><div class="hero-stat-value">4.9★</div><div class="hero-stat-label">Rating</div></div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat"><div class="hero-stat-value">20 min</div><div class="hero-stat-label">Avg Prep Time</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories Strip -->
+<section class="section-sm" style="background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <div class="flex items-center gap-3 flex-wrap justify-center" id="home-categories">
+      <div class="spinner"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Items -->
+<section class="section" id="featured">
+  <div class="container">
+    <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+      <div>
+        <h2 class="display-font" style="font-size:clamp(1.5rem,3vw,2.25rem)">Popular Picks</h2>
+        <p class="text-muted mt-1">Our best-loved items, freshly prepared</p>
+      </div>
+      <a href="/menu" class="btn btn-secondary">View Full Menu →</a>
+    </div>
+    <div class="grid grid-auto gap-3" id="featured-grid">
+      <div class="loading-overlay" style="grid-column:1/-1"><div class="spinner-lg spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Why Us -->
+<section class="section" style="background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h2 class="display-font" style="font-size:clamp(1.5rem,3vw,2.25rem)">Why Choose CafeNest?</h2>
+      <p class="text-muted mt-2">We go beyond just coffee</p>
+    </div>
+    <div class="grid grid-4 gap-3">
+      <div class="card text-center">
+        <div style="font-size:2.5rem;margin-bottom:1rem">☕</div>
+        <h3 style="font-size:1rem;margin-bottom:.5rem">Premium Ingredients</h3>
+        <p class="text-sm text-muted">Sourced from top farms, roasted to perfection</p>
+      </div>
+      <div class="card text-center">
+        <div style="font-size:2.5rem;margin-bottom:1rem">⚡</div>
+        <h3 style="font-size:1rem;margin-bottom:.5rem">Fast Service</h3>
+        <p class="text-sm text-muted">Ready in under 20 minutes, guaranteed</p>
+      </div>
+      <div class="card text-center">
+        <div style="font-size:2.5rem;margin-bottom:1rem">🛡️</div>
+        <h3 style="font-size:1rem;margin-bottom:.5rem">Hygiene First</h3>
+        <p class="text-sm text-muted">Strict standards, clean kitchen, safe food</p>
+      </div>
+      <div class="card text-center">
+        <div style="font-size:2.5rem;margin-bottom:1rem">📱</div>
+        <h3 style="font-size:1rem;margin-bottom:.5rem">Easy Ordering</h3>
+        <p class="text-sm text-muted">Order online in seconds, track in real time</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section">
+  <div class="container text-center">
+    <div class="card" style="max-width:600px;margin:0 auto;padding:3rem 2rem;background:linear-gradient(135deg,var(--bg-card),var(--bg-raised));border-color:var(--border-strong)">
+      <div style="font-size:3rem;margin-bottom:1rem">☕</div>
+      <h2 class="display-font mb-2" style="font-size:1.875rem">Ready to Order?</h2>
+      <p class="text-muted mb-3">Browse our full menu and place your order in minutes.</p>
+      <a href="/menu" class="btn btn-primary btn-lg">Browse Full Menu</a>
+    </div>
+  </div>
+</section>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadHomeData(){
+  // Categories
+  const {data:cData} = await apiGet('/api/menu/categories');
+  const catContainer = document.getElementById('home-categories');
+  if(cData?.data){
+    const cats = [{category_id:0,name:'All'},...cData.data];
+    catContainer.innerHTML = cats.map(c=>`
+      <a href="/menu${c.category_id?'?cat='+c.category_id:''}" style="text-decoration:none">
+        <span class="category-pill">${c.icon||'🍽'} ${c.name}</span>
+      </a>`).join('');
+  }
+  // Featured items (top 8 popular)
+  const {data:mData} = await apiGet('/api/menu/?available=1&limit=8');
+  const grid = document.getElementById('featured-grid');
+  if(mData?.data && mData.data.length>0){
+    grid.innerHTML = mData.data.map(item=>buildFoodCard(item)).join('');
+  } else {
+    grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">🍽</div><p class="empty-state-text">Menu items loading...</p></div>';
+  }
+}
+
+function buildFoodCard(item){
+  const avail = item.is_available;
+  return `<div class="food-card ${avail?'':'food-unavailable'}">
+    <div class="food-card-img-wrap">
+      <img src="/static/images/${item.image_url||'placeholder.jpg'}" onerror="imgError(this)" alt="${item.name}" loading="lazy">
+      <div class="food-card-badges">
+        ${item.is_veg!==undefined?`<span class="badge ${item.is_veg?'badge-success':'badge-error'}">${item.is_veg?'Veg':'Non-Veg'}</span>`:''}
+        ${!avail?'<span class="badge badge-muted">Unavailable</span>':''}
+      </div>
+    </div>
+    <div class="food-card-body">
+      <div class="food-card-name">${item.name}</div>
+      <div class="food-card-desc">${item.description||''}</div>
+      <div class="food-card-footer">
+        <span class="food-price">${formatCurrency(item.price)}</span>
+        ${avail?`<button class="btn btn-primary btn-sm" onclick="addToCart(${item.menu_id},'${item.name.replace(/'/g,"\'")}')">+ Add</button>`:'<span class="text-sm text-muted">Unavailable</span>'}
+      </div>
+    </div>
+  </div>`;
+}
+
+async function addToCart(id, name){
+  const {ok,data} = await apiPost('/api/cart/add',{menu_id:id,quantity:1});
+  if(ok && data.success){ showToast(`${name} added to cart!`,'success'); refreshCartBadge(); }
+  else if(data?.message==='Login required'){ showToast('Please login to add items to cart','warning'); setTimeout(()=>window.location.href='/login',1200); }
+  else showToast(data?.message||'Failed to add item','error');
+}
+
+document.addEventListener('DOMContentLoaded', loadHomeData);
+</script>
+{% endblock %}

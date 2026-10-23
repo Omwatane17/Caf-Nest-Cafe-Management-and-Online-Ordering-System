@@ -1,0 +1,101 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Staff{% endblock %}
+{% block page_title %}Staff Management{% endblock %}
+{% block nav_staff %}active{% endblock %}
+
+{% block admin_content %}
+<div class="flex justify-between items-center mb-3">
+  <p class="text-sm text-muted" id="staff-count"></p>
+  <button class="btn btn-primary" onclick="openStaffModal()">+ Add Staff</button>
+</div>
+<div class="table-wrap">
+  <table id="staff-table">
+    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody><tr><td colspan="6" class="text-center" style="padding:2rem"><div class="spinner"></div></td></tr></tbody>
+  </table>
+</div>
+
+<div class="modal-overlay hidden" id="staff-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="staff-modal-title">Add Staff</h2>
+      <button class="modal-close" onclick="closeStaffModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Full Name *</label><input id="s-name" class="form-input" placeholder="Full name"></div>
+      <div class="form-group"><label class="form-label">Email *</label><input id="s-email" type="email" class="form-input" placeholder="staff@cafe.com"></div>
+      <div class="form-group"><label class="form-label">Phone</label><input id="s-phone" type="tel" class="form-input" placeholder="+91 ..."></div>
+      <div class="form-group"><label class="form-label">Role *</label>
+        <select id="s-role" class="form-select"><option value="staff">Staff</option><option value="manager">Manager</option><option value="admin">Admin</option></select>
+      </div>
+      <div class="form-group" id="pw-field"><label class="form-label">Password *</label><input id="s-pw" type="password" class="form-input" placeholder="Min. 6 chars"></div>
+      <div class="form-group" id="newpw-field" style="display:none"><label class="form-label">New Password <span class="text-faint">(leave blank to keep)</span></label><input id="s-newpw" type="password" class="form-input" placeholder="New password"></div>
+      <div class="form-group" id="active-field" style="display:none"><label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="s-active"> Active</label></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeStaffModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStaff()">Save</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let editStaffId=null;
+const roleColors={admin:'badge-error',manager:'badge-warning',staff:'badge-info'};
+
+async function loadStaff(){
+  const tbody=document.querySelector('#staff-table tbody');
+  const {ok,data}=await apiGet('/api/staff/');
+  if(!ok||!data.success){ tbody.innerHTML='<tr><td colspan="6" class="text-center text-muted" style="padding:2rem">Failed to load</td></tr>'; return; }
+  const staff=data.data||[];
+  document.getElementById('staff-count').textContent=`${staff.length} staff member${staff.length===1?'':'s'}`;
+  tbody.innerHTML=staff.map(s=>`<tr>
+    <td><strong>${s.name}</strong></td>
+    <td class="text-sm text-muted">${s.email}</td>
+    <td><span class="badge ${roleColors[s.role]||'badge-muted'}">${s.role}</span></td>
+    <td class="text-sm text-muted">${s.phone||'—'}</td>
+    <td>${s.is_active?'<span class="badge badge-success">Active</span>':'<span class="badge badge-muted">Inactive</span>'}</td>
+    <td><div class="flex gap-1">
+      <button class="btn btn-sm btn-ghost" onclick="editStaff(${s.staff_id})">Edit</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteStaff(${s.staff_id},'${s.name.replace(/'/g,"\'")}')">Delete</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+function openStaffModal(){ editStaffId=null; document.getElementById('staff-modal-title').textContent='Add Staff'; ['s-name','s-email','s-phone','s-pw','s-newpw'].forEach(id=>document.getElementById(id).value=''); document.getElementById('s-role').value='staff'; document.getElementById('pw-field').style.display=''; document.getElementById('newpw-field').style.display='none'; document.getElementById('active-field').style.display='none'; document.getElementById('staff-modal').classList.remove('hidden'); }
+function closeStaffModal(){ document.getElementById('staff-modal').classList.add('hidden'); }
+
+async function editStaff(id){
+  const {ok,data}=await apiGet(`/api/staff/${id}`); if(!ok||!data.success) return;
+  const s=data.data; editStaffId=id;
+  document.getElementById('staff-modal-title').textContent=`Edit ${s.name}`;
+  document.getElementById('s-name').value=s.name; document.getElementById('s-email').value=s.email;
+  document.getElementById('s-phone').value=s.phone||''; document.getElementById('s-role').value=s.role;
+  document.getElementById('s-active').checked=s.is_active; document.getElementById('s-newpw').value='';
+  document.getElementById('pw-field').style.display='none'; document.getElementById('newpw-field').style.display=''; document.getElementById('active-field').style.display='';
+  document.getElementById('staff-modal').classList.remove('hidden');
+}
+
+async function saveStaff(){
+  const body={name:document.getElementById('s-name').value.trim(),email:document.getElementById('s-email').value.trim(),phone:document.getElementById('s-phone').value.trim(),role:document.getElementById('s-role').value};
+  if(!editStaffId){ body.password=document.getElementById('s-pw').value; }
+  else { body.is_active=document.getElementById('s-active').checked; const pw=document.getElementById('s-newpw').value; if(pw) body.new_password=pw; }
+  if(!body.name||!body.email){ showToast('Name and email required','warning'); return; }
+  const {ok,data}=editStaffId?await apiPut(`/api/staff/${editStaffId}`,body):await apiPost('/api/staff/',body);
+  if(ok&&data.success){ showToast(editStaffId?'Updated!':'Staff added!','success'); closeStaffModal(); loadStaff(); }
+  else showToast(data?.message||'Failed','error');
+}
+
+async function deleteStaff(id,name){
+  const yes=await showConfirm('Delete Staff',`Remove "${name}" from staff?`);
+  if(!yes) return;
+  const {ok,data}=await apiDelete(`/api/staff/${id}`);
+  if(ok&&data.success){ showToast('Deleted!','success'); loadStaff(); }
+  else showToast(data?.message||'Failed','error');
+}
+
+document.addEventListener('DOMContentLoaded',loadStaff);
+</script>
+{% endblock %}

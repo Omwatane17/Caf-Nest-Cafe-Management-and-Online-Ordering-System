@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Checkout{% endblock %}
+{% block meta_desc %}Complete your CafeNest order. Choose payment method and confirm your order.{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="container-sm" style="padding-top:2rem;padding-bottom:4rem;max-width:700px">
+    <h1 class="display-font mb-3" style="font-size:clamp(1.5rem,3vw,2.25rem)">Checkout</h1>
+
+    <div id="checkout-error" class="alert alert-error mb-3" style="display:none"></div>
+
+    <!-- Order Summary -->
+    <div class="card mb-3">
+      <h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem">📋 Order Summary</h2>
+      <div id="checkout-items"><div class="loading-overlay"><div class="spinner"></div></div></div>
+      <div class="divider"></div>
+      <div class="flex justify-between items-center font-bold" style="font-size:1.125rem">
+        <span>Total</span>
+        <span style="color:var(--primary)" id="checkout-total">₹0.00</span>
+      </div>
+    </div>
+
+    <!-- Order Type -->
+    <div class="card mb-3">
+      <h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem">🍽 Order Type</h2>
+      <div class="flex gap-2 flex-wrap">
+        <label class="payment-option flex-1" style="min-width:140px">
+          <input type="radio" name="order_type" value="dine_in" style="display:none">
+          <div class="payment-radio"></div>
+          <div><div class="payment-label">🪑 Dine In</div><div class="payment-desc">Eat at the cafe</div></div>
+        </label>
+        <label class="payment-option flex-1 selected" style="min-width:140px">
+          <input type="radio" name="order_type" value="takeaway" checked style="display:none">
+          <div class="payment-radio"></div>
+          <div><div class="payment-label">🥡 Takeaway</div><div class="payment-desc">Pick up yourself</div></div>
+        </label>
+        <label class="payment-option flex-1" style="min-width:140px">
+          <input type="radio" name="order_type" value="delivery" style="display:none">
+          <div class="payment-radio"></div>
+          <div><div class="payment-label">🛵 Delivery</div><div class="payment-desc">Delivered to you</div></div>
+        </label>
+      </div>
+      <div id="table-select-area" class="mt-2" style="display:none">
+        <label class="form-label">Select Table</label>
+        <select id="table-select" class="form-select"></select>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    <div class="card mb-3">
+      <h2 style="font-size:1rem;font-weight:700;margin-bottom:1rem">💳 Payment Method</h2>
+      <div class="flex gap-2 flex-wrap">
+        <label class="payment-option flex-1 selected">
+          <input type="radio" name="payment" value="cash" checked style="display:none">
+          <div class="payment-radio"></div>
+          <div>
+            <div class="payment-label">💵 Cash</div>
+            <div class="payment-desc">Pay at counter or on delivery</div>
+            <div class="payment-simulated">Simulated — no real transaction</div>
+          </div>
+        </label>
+        <label class="payment-option flex-1">
+          <input type="radio" name="payment" value="upi" style="display:none">
+          <div class="payment-radio"></div>
+          <div>
+            <div class="payment-label">📱 UPI</div>
+            <div class="payment-desc">Pay via UPI (simulated)</div>
+            <div class="payment-simulated">Simulated — no real transaction</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="card mb-3">
+      <h2 style="font-size:1rem;font-weight:700;margin-bottom:.75rem">📝 Special Instructions</h2>
+      <textarea id="order-notes" class="form-input" rows="3" placeholder="Any special requests? (optional)" style="resize:vertical"></textarea>
+    </div>
+
+    <button class="btn btn-primary btn-block btn-lg" id="place-order-btn">Place Order →</button>
+    <a href="/menu" class="btn btn-ghost btn-block mt-1" style="margin-top:.75rem">← Continue Shopping</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Payment option toggle style
+document.querySelectorAll('.payment-option input[type=radio]').forEach(radio=>{
+  radio.closest('.payment-option').addEventListener('click',function(){
+    const name=this.querySelector('input').name;
+    document.querySelectorAll(`.payment-option:has(input[name="${name}"])`).forEach(el=>el.classList.remove('selected'));
+    this.classList.add('selected');
+    this.querySelector('input').checked=true;
+    if(name==='order_type'){
+      document.getElementById('table-select-area').style.display=this.querySelector('input').value==='dine_in'?'':'none';
+    }
+  });
+});
+
+async function loadCheckoutCart(){
+  const {ok,data}=await apiGet('/api/cart/');
+  if(!ok||!data.success||!data.data?.items?.length){
+    document.getElementById('checkout-items').innerHTML='<p class="text-muted text-center">Your cart is empty. <a href="/menu">Browse menu</a></p>';
+    document.getElementById('place-order-btn').disabled=true;
+    return;
+  }
+  const items=data.data.items;
+  document.getElementById('checkout-items').innerHTML=items.map(i=>`
+    <div class="flex justify-between items-center" style="padding:.5rem 0;border-bottom:1px solid var(--border)">
+      <span class="font-semibold">${i.name} <span class="text-muted">x${i.quantity}</span></span>
+      <span style="color:var(--primary)">${formatCurrency(i.price*i.quantity)}</span>
+    </div>`).join('');
+  document.getElementById('checkout-total').textContent=formatCurrency(data.data.total);
+}
+
+async function loadTables(){
+  const {data}=await apiGet('/api/tables/');
+  const sel=document.getElementById('table-select');
+  if(data?.data){ sel.innerHTML=data.data.filter(t=>t.status==='available').map(t=>`<option value="${t.table_id}">Table ${t.table_number} (${t.capacity} seats)</option>`).join(''); }
+}
+
+document.getElementById('place-order-btn').addEventListener('click',async()=>{
+  const btn=document.getElementById('place-order-btn');
+  const errEl=document.getElementById('checkout-error');
+  const payment_method=document.querySelector('input[name="payment"]:checked')?.value||'cash';
+  const order_type=document.querySelector('input[name="order_type"]:checked')?.value||'takeaway';
+  const notes=document.getElementById('order-notes').value.trim();
+  const table_id=order_type==='dine_in'?parseInt(document.getElementById('table-select').value)||null:null;
+  errEl.style.display='none';
+  setLoading(btn,true);
+  const {ok,data}=await apiPost('/api/orders/checkout',{payment_method,order_type,notes,table_id});
+  setLoading(btn,false);
+  if(ok && data.success){
+    showToast('Order placed successfully!','success');
+    setTimeout(()=>window.location.href=`/order-confirmation?order_id=${data.order_id}`,800);
+  } else if(data?.message?.includes('Login')){ window.location.href='/login?next=/checkout'; }
+  else { errEl.textContent=data?.message||'Order failed. Please try again.'; errEl.style.display='flex'; }
+});
+
+document.addEventListener('DOMContentLoaded',()=>{ loadCheckoutCart(); loadTables(); });
+</script>
+{% endblock %}

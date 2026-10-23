@@ -1,0 +1,1 @@
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'CafeNest@2024'; FLUSH PRIVILEGES;

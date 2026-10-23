@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="container-sm" style="padding-top:2rem;padding-bottom:4rem;max-width:560px">
+    <h1 class="display-font mb-3" style="font-size:clamp(1.5rem,3vw,2rem)">My Profile</h1>
+    <div id="profile-error" class="alert alert-error mb-2" style="display:none"></div>
+    <div id="profile-success" class="alert alert-success mb-2" style="display:none"></div>
+    <div class="card">
+      <form id="profile-form" novalidate>
+        <div class="flex flex-col gap-3">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="pf-name" class="form-input" placeholder="Full name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="pf-email" class="form-input" disabled style="opacity:.6;cursor:not-allowed">
+            <p class="form-hint">Email cannot be changed</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" id="pf-phone" class="form-input" placeholder="+91 98765 43210">
+          </div>
+          <div class="divider"></div>
+          <p class="text-sm font-semibold">Change Password <span class="text-muted">(leave blank to keep current)</span></p>
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <input type="password" id="pf-pw" class="form-input" placeholder="Min. 6 characters" minlength="6">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="save-profile-btn">Save Changes</button>
+        </div>
+      </form>
+    </div>
+    <div class="mt-2 text-center">
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadProfile(){
+  const {ok,data}=await apiGet('/api/auth/me');
+  if(!ok||!data.success){ window.location.href='/login?next=/profile'; return; }
+  const u=data.data;
+  document.getElementById('pf-name').value=u.name||'';
+  document.getElementById('pf-email').value=u.email||'';
+  document.getElementById('pf-phone').value=u.phone||'';
+}
+document.getElementById('profile-form').addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  const btn=document.getElementById('save-profile-btn');
+  const errEl=document.getElementById('profile-error');
+  const succEl=document.getElementById('profile-success');
+  errEl.style.display='none'; succEl.style.display='none';
+  const body={name:document.getElementById('pf-name').value.trim(),phone:document.getElementById('pf-phone').value.trim()};
+  const pw=document.getElementById('pf-pw').value;
+  if(pw){ if(pw.length<6){errEl.textContent='Password too short';errEl.style.display='flex';return;} body.new_password=pw; }
+  setLoading(btn,true);
+  const {ok,data}=await apiPut('/api/auth/profile',body);
+  setLoading(btn,false);
+  if(ok&&data.success){ succEl.textContent='Profile updated!'; succEl.style.display='flex'; showToast('Saved!','success'); }
+  else{ errEl.textContent=data?.message||'Update failed'; errEl.style.display='flex'; }
+});
+document.addEventListener('DOMContentLoaded',loadProfile);
+</script>
+{% endblock %}

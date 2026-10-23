@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}My Orders{% endblock %}
+{% block nav_orders %}active{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="container" style="padding-top:2rem;padding-bottom:4rem;max-width:800px">
+    <h1 class="display-font mb-3" style="font-size:clamp(1.5rem,3vw,2.25rem)">My Orders</h1>
+    <div id="orders-container"><div class="loading-overlay"><div class="spinner-lg spinner"></div></div></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadOrders(){
+  const container=document.getElementById('orders-container');
+  const {ok,data}=await apiGet('/api/orders/my');
+  if(!ok){ 
+    if(data?.message?.includes('Login')){ window.location.href='/login?next=/orders'; return; }
+    container.innerHTML='<div class="alert alert-error">Could not load orders.</div>'; return;
+  }
+  const orders=data.data||[];
+  if(orders.length===0){
+    container.innerHTML=`<div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <p class="empty-state-title">No orders yet</p>
+      <p class="empty-state-text">Place your first order and see it here!</p>
+      <a href="/menu" class="btn btn-primary">Browse Menu</a>
+    </div>`; return;
+  }
+  container.innerHTML=orders.map(o=>`
+    <div class="card mb-2" style="cursor:pointer" onclick="toggleOrderDetail(${o.order_id},this)">
+      <div class="flex justify-between items-start gap-2 flex-wrap">
+        <div>
+          <div class="font-bold">Order #${o.order_id}</div>
+          <div class="text-sm text-muted mt-1">${formatDate(o.created_at)}</div>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          ${orderStatusBadge(o.status)}
+          <span class="font-bold" style="color:var(--primary)">${formatCurrency(o.total)}</span>
+          <span class="text-muted text-sm">▼</span>
+        </div>
+      </div>
+      <div class="order-detail-panel" id="detail-${o.order_id}" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <div class="spinner"></div>
+      </div>
+    </div>`).join('');
+}
+
+async function toggleOrderDetail(id,card){
+  const panel=document.getElementById(`detail-${id}`);
+  const isOpen=panel.style.display!=='none';
+  panel.style.display=isOpen?'none':'block';
+  if(!isOpen && panel.innerHTML.includes('spinner')){
+    const {ok,data}=await apiGet(`/api/orders/my/${id}`);
+    if(!ok||!data.success){ panel.innerHTML='<p class="text-muted text-sm">Could not load details.</p>'; return; }
+    const o=data.data;
+    panel.innerHTML=`
+      <div class="grid grid-2 gap-2 mb-2 text-sm">
+        <div><span class="text-muted">Order Type:</span> <strong>${o.order_type||'—'}</strong></div>
+        <div><span class="text-muted">Payment:</span> <strong>${o.payment_method||'—'}</strong></div>
+        ${o.transaction_ref?`<div style="grid-column:1/-1"><span class="text-muted">Ref:</span> <code style="font-size:.75rem;color:var(--primary)">${o.transaction_ref}</code></div>`:''}
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+        <tbody>${(o.items||[]).map(i=>`<tr>
+          <td>${i.name}</td><td>${i.quantity}</td>
+          <td>${formatCurrency(i.unit_price)}</td>
+          <td>${formatCurrency(i.subtotal)}</td>
+        </tr>`).join('')}</tbody>
+        </table>
+      </div>`;
+  }
+}
+document.addEventListener('DOMContentLoaded',loadOrders);
+</script>
+{% endblock %}
